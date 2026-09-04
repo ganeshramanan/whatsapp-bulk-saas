@@ -1,0 +1,35 @@
+services:
+  # WhatsApp SaaS Web API & Worker Service
+  - type: web
+    name: grambi-whatsapp-saas
+    runtime: node
+    plan: free
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma db push && node dist/index.js
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: grambi-postgres-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: grambi-redis
+          property: connectionString
+
+  # Managed PostgreSQL Database
+  - type: pg
+    name: grambi-postgres-db
+    plan: free
+    ipAllowList: []
+
+  # Managed Redis Queue
+  - type: redis
+    name: grambi-redis
+    plan: free
+    maxmemoryPolicy: noeviction
+    ipAllowList: []
