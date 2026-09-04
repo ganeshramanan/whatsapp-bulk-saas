@@ -164,10 +164,16 @@
           </div>
 
           <!-- Launch Button -->
-          <button id="launchBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 px-4 rounded-xl shadow-sm transition flex items-center justify-center space-x-2 text-sm">
-            <i data-lucide="rocket" class="w-4 h-4"></i>
-            <span>Launch Broadcast to Customers</span>
-          </button>
+          <div class="space-y-2">
+            <button id="launchBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 px-4 rounded-xl shadow-sm transition flex items-center justify-center space-x-2 text-sm">
+              <i data-lucide="rocket" class="w-4 h-4"></i>
+              <span>Launch Broadcast to Customers</span>
+            </button>
+            <button id="sandboxTestBtn" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 px-4 rounded-xl transition flex items-center justify-center space-x-2 text-xs border border-slate-200">
+              <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-600"></i>
+              <span>Instant Sandbox Test (Bypasses Template Review)</span>
+            </button>
+          </div>
 
           <div id="broadcastAlert" class="hidden p-4 rounded-xl text-xs font-medium"></div>
         </div>
@@ -339,6 +345,37 @@
         }
       } catch (e) {
         showBroadcastAlert('Network error occurred', 'error');
+      }
+    });
+
+    // Instant Sandbox Test (No Template Review Needed)
+    document.getElementById('sandboxTestBtn').addEventListener('click', async () => {
+      const token = localStorage.getItem('grambi_token');
+      const numbers = parseNumbers(document.getElementById('recipientList').value);
+
+      if (numbers.length === 0) {
+        showBroadcastAlert('Please paste at least 1 verified test phone number.', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/messages/sandbox-test', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ recipientNumber: numbers[0] }),
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          showBroadcastAlert(`⚡ Instant test message sent successfully to ${numbers[0]}!`, 'success');
+        } else {
+          showBroadcastAlert(data.error || 'Failed to send sandbox test', 'error');
+        }
+      } catch (err) {
+        showBroadcastAlert('Network error during sandbox test', 'error');
       }
     });
 
