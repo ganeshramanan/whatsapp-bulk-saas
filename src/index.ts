@@ -102,6 +102,22 @@ app.post('/api/messages/sandbox-test', authMiddleware, async (req: AuthRequest, 
 app.get('/webhook', verifyWebhook);
 app.post('/webhook', handleWebhookEvents);
 
+// Quick Helper to Promote Any User to Admin (For Testing / Owner Setup)
+app.post('/api/admin/make-admin', async (req: express.Request, res: express.Response) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email is required.' });
+
+  try {
+    const updated = await prisma.user.update({
+      where: { email },
+      data: { role: 'ADMIN' },
+    });
+    return res.json({ success: true, message: `User ${email} is now an ADMIN! Please sign in again.` });
+  } catch (err) {
+    return res.status(404).json({ error: `User with email "${email}" not found.` });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Grambi SaaS Platform live on http://localhost:${PORT}`);
