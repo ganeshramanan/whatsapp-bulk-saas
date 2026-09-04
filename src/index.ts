@@ -3,7 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import dotenv from 'dotenv';
 import { register, login, getProfile } from './controllers/auth.controller';
-import { sendBulkMessages, listCustomerCampaigns, getCampaignDetails } from './controllers/message.controller';
+import { sendBulkMessages, listCustomerCampaigns, getCampaignDetails, getCustomerTemplates } from './controllers/message.controller';
 import { verifyWebhook, handleWebhookEvents } from './controllers/webhook.controller';
 import { authMiddleware, AuthRequest } from './middlewares/auth.middleware';
 import { WhatsAppService } from './services/whatsapp.service';
@@ -28,6 +28,7 @@ app.post('/api/auth/login', login);
 app.get('/api/auth/profile', authMiddleware, getProfile);
 
 // Authenticated Campaign Routes
+app.get('/api/templates', authMiddleware, getCustomerTemplates);
 app.post('/api/messages/bulk', authMiddleware, sendBulkMessages);
 app.get('/api/campaigns', authMiddleware, listCustomerCampaigns);
 app.get('/api/campaigns/:id', authMiddleware, getCampaignDetails);

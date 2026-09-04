@@ -345,6 +345,31 @@
       alertBox.textContent = '';
       
       loadCampaigns();
+      fetchMetaTemplates(); // Dynamically fetch Meta templates
+    }
+
+    // Dynamically Fetch Live Templates from Meta API
+    async function fetchMetaTemplates() {
+      const token = localStorage.getItem('grambi_token');
+      if (!token) return;
+
+      const select = document.getElementById('customTemplateName');
+      try {
+        const res = await fetch('/api/templates', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const templates = data.templates || [];
+
+        if (templates.length > 0) {
+          select.innerHTML = templates.map(t => {
+            const statusIcon = t.status === 'APPROVED' ? '🟢' : t.status === 'IN_REVIEW' ? '🟡' : '🔴';
+            return `<option value="${t.name}">${statusIcon} ${t.name} (${t.status})</option>`;
+          }).join('');
+        }
+      } catch (err) {
+        console.error('Failed to sync templates dynamically', err);
+      }
     }
 
     // Number parser

@@ -1,10 +1,57 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { bulkMessageQueue } from '../queues/message.queue';
+import { WhatsAppService } from '../services/whatsapp.service';
 import { z } from 'zod';
 import { AuthRequest } from '../middlewares/auth.middleware';
 
 const prisma = new PrismaClient();
+const waService = new WhatsAppService();
+
+// Fetch live templates dynamically from Meta Cloud API
+export const getCustomerTemplates = async (req: AuthRequest, res: Response) => {
+  const userId = req.userId;
+  if (!userId) return res.status(401).json({ error: 'Unauthorized.' });
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user || !user.wabaId || !user.accessToken) {
+    // If WABA ID is not provided, return default template options
+    return res.json({
+      templates: [
+        { name: 'hello_world', status: 'APPROVED', category: 'UTILITY', language: 'en_US' },
+        { name: 'order_update', status: 'APPROVED', category: 'UTILITY', language: 'en_US' }
+      ]
+    });
+  }
+
+  try {
+    const axios = (await import('axios')).default;
+    const url = `https://graph.facebook.com/v20.0/${user.wabaId}/message_templates`;
+    const response = await axios.get(url, {
+      headers: { Authorization: `Bearer ${user.accessToken}` },
+    });
+
+    const metaTemplates = response.data.data || [];
+    const formatted = metaTemplates.map((t: any) => ({
+      name: t.name,
+      status: t.status, // APPROVED, IN_REVIEW, REJECTED
+      category: t.category,
+      language: t.language,
+    }));
+
+    return res.json({ templates: formatted });
+  } catch (err: any) {
+    const errMsg = err.response?.data?.error?.message || err.message;
+    console.error('Failed to fetch Meta templates:', errMsg);
+    // Fallback gracefully
+    return res.json({
+      templates: [
+        { name: 'hello_world', status: 'APPROVED', category: 'UTILITY', language: 'en_US' },
+        { name: 'order_update', status: 'APPROVED', category: 'UTILITY', language: 'en_US' }
+      ]
+    });
+  }
+};
 
 const BulkSendSchema = z.object({
   campaignName: z.string().min(1),
