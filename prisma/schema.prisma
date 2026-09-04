@@ -1,0 +1,49 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String          @id @default(uuid())
+  email         String          @unique
+  password      String
+  businessName  String
+  
+  // Meta Cloud API Credentials (configured once during setup)
+  wabaId        String?
+  phoneNumberId String?
+  accessToken   String?
+  
+  createdAt     DateTime        @default(now())
+  campaigns     Campaign[]
+}
+
+model Campaign {
+  id           String          @id @default(uuid())
+  userId       String
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  templateName String          @default("general_broadcast")
+  languageCode String          @default("en_US")
+  createdAt    DateTime        @default(now())
+  messages     MessageRecord[]
+}
+
+model MessageRecord {
+  id           String    @id @default(uuid())
+  campaignId   String
+  campaign     Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  phoneNumber  String
+  wamid        String?   @unique
+  status       String    @default("PENDING") // PENDING, SENT, DELIVERED, READ, FAILED
+  errorMessage String?
+  sentAt       DateTime?
+  deliveredAt  DateTime?
+  readAt       DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}

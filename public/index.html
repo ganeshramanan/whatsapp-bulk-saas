@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grambi | WhatsApp Broadcast SaaS</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased font-sans min-h-screen flex flex-col">
+
+  <!-- ================= AUTH VIEW (Login / Register) ================= -->
+  <div id="authView" class="flex-1 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-lg border border-slate-200">
+      
+      <!-- Brand Header -->
+      <div class="text-center mb-6">
+        <div class="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mx-auto shadow-sm">
+          G
+        </div>
+        <h1 class="text-xl font-bold text-slate-900 mt-3">Welcome to Grambi</h1>
+        <p class="text-xs text-slate-500 mt-1">Smart WhatsApp Bulk Broadcasting</p>
+      </div>
+
+      <!-- Tabs: Sign In / Register -->
+      <div class="flex border-b border-slate-200 mb-6 text-sm font-medium">
+        <button id="tabLogin" class="flex-1 pb-3 text-emerald-600 border-b-2 border-emerald-600 text-center">
+          Sign In
+        </button>
+        <button id="tabRegister" class="flex-1 pb-3 text-slate-400 hover:text-slate-600 text-center">
+          Register Customer
+        </button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">Business Email</label>
+          <input id="loginEmail" type="email" required placeholder="name@company.com"
+                 class="w-full text-sm px-3.5 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">Password</label>
+          <input id="loginPassword" type="password" required placeholder="••••••••"
+                 class="w-full text-sm px-3.5 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl shadow-sm text-sm transition">
+          Sign In to Dashboard
+        </button>
+      </form>
+
+      <!-- Register Form (Collects Meta IDs One Time) -->
+      <form id="registerForm" class="space-y-3 hidden">
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">Business Name</label>
+          <input id="regBusinessName" type="text" required placeholder="e.g. Apex Hospital / City Clinic"
+                 class="w-full text-sm px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Email</label>
+            <input id="regEmail" type="email" required placeholder="admin@store.com"
+                   class="w-full text-sm px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Password</label>
+            <input id="regPassword" type="password" required placeholder="••••••••"
+                   class="w-full text-sm px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-100">
+          <p class="text-[11px] font-semibold text-slate-800 mb-2">WhatsApp Meta Credentials (One-time Setup)</p>
+          <div class="space-y-2">
+            <div>
+              <label class="block text-[11px] text-slate-600 mb-0.5">Phone Number ID</label>
+              <input id="regPhoneId" type="text" required placeholder="1269930609537457"
+                     class="w-full text-xs px-3 py-1.5 border border-slate-200 rounded-lg font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-600 mb-0.5">Permanent Access Token</label>
+              <input id="regToken" type="password" required placeholder="EAAG..."
+                     class="w-full text-xs px-3 py-1.5 border border-slate-200 rounded-lg font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl shadow-sm text-sm transition mt-2">
+          Create Account & Connect
+        </button>
+      </form>
+
+      <div id="authAlert" class="hidden mt-4 p-3 rounded-xl text-xs font-medium"></div>
+    </div>
+  </div>
+
+  <!-- ================= DASHBOARD VIEW (Clean, Simple, Zero Technical Jargon) ================= -->
+  <div id="dashboardView" class="hidden flex-1 flex flex-col">
+    
+    <!-- Top Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+            G
+          </div>
+          <div>
+            <h1 class="text-sm font-bold text-slate-900 leading-tight" id="headerBusinessName">My Business</h1>
+            <p class="text-[11px] text-slate-400">WhatsApp Marketing Portal</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-4">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
+            Sender Active
+          </span>
+          <button id="logoutBtn" class="text-xs font-medium text-slate-500 hover:text-rose-600 flex items-center space-x-1 transition">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            <span>Logout</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
+      
+      <!-- Broadcast Sender Box (7 cols) -->
+      <div class="lg:col-span-7 space-y-6">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-5">
+          <div class="flex items-center space-x-2 pb-3 border-b border-slate-100">
+            <i data-lucide="send" class="w-5 h-5 text-emerald-600"></i>
+            <h2 class="text-base font-semibold text-slate-900">Send WhatsApp Broadcast</h2>
+          </div>
+
+          <!-- Campaign Name -->
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1">Campaign Title</label>
+            <input id="campaignName" type="text" placeholder="e.g. Weekend Discount Blast"
+                   class="w-full text-sm px-3.5 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+          </div>
+
+          <!-- Template Name (Pre-configured) -->
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-700">Template Used</span>
+              <span class="text-xs font-mono bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">order_update</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1">Pre-approved Meta business template applied automatically to guarantee 100% inbox delivery.</p>
+          </div>
+
+          <!-- Phone Numbers Input -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-medium text-slate-700">Paste Customer Phone Numbers</label>
+              <span id="recipientCount" class="text-xs text-emerald-600 font-semibold">0 numbers</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mb-2">Paste numbers with country code (one per line or separated by commas). E.g. 919876543210</p>
+            <textarea id="recipientList" rows="6" placeholder="919962761010&#10;918056132037&#10;919876543210"
+                      class="w-full text-sm px-3.5 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono"></textarea>
+          </div>
+
+          <!-- Launch Button -->
+          <button id="launchBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 px-4 rounded-xl shadow-sm transition flex items-center justify-center space-x-2 text-sm">
+            <i data-lucide="rocket" class="w-4 h-4"></i>
+            <span>Launch Broadcast to Customers</span>
+          </button>
+
+          <div id="broadcastAlert" class="hidden p-4 rounded-xl text-xs font-medium"></div>
+        </div>
+      </div>
+
+      <!-- Real-Time Reports & History (5 cols) -->
+      <div class="lg:col-span-5 space-y-6">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+          <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="bar-chart-2" class="w-5 h-5 text-emerald-600"></i>
+              <h2 class="text-base font-semibold text-slate-900">Your Broadcast Reports</h2>
+            </div>
+            <button id="refreshReports" class="text-xs text-slate-500 hover:text-slate-900 flex items-center space-x-1">
+              <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+              <span>Refresh</span>
+            </button>
+          </div>
+
+          <div id="campaignsContainer" class="mt-4 space-y-3">
+            <div class="text-center py-8 text-xs text-slate-400">Loading your history...</div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- JavaScript Client Logic -->
+  <script>
+    lucide.createIcons();
+
+    // Tab Switching
+    const tabLogin = document.getElementById('tabLogin');
+    const tabRegister = document.getElementById('tabRegister');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+
+    tabLogin.addEventListener('click', () => {
+      tabLogin.className = 'flex-1 pb-3 text-emerald-600 border-b-2 border-emerald-600 text-center font-semibold';
+      tabRegister.className = 'flex-1 pb-3 text-slate-400 hover:text-slate-600 text-center';
+      loginForm.classList.remove('hidden');
+      registerForm.classList.add('hidden');
+    });
+
+    tabRegister.addEventListener('click', () => {
+      tabRegister.className = 'flex-1 pb-3 text-emerald-600 border-b-2 border-emerald-600 text-center font-semibold';
+      tabLogin.className = 'flex-1 pb-3 text-slate-400 hover:text-slate-600 text-center';
+      registerForm.classList.remove('hidden');
+      loginForm.classList.add('hidden');
+    });
+
+    // Handle Registration
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        businessName: document.getElementById('regBusinessName').value,
+        email: document.getElementById('regEmail').value,
+        password: document.getElementById('regPassword').value,
+        phoneNumberId: document.getElementById('regPhoneId').value,
+        accessToken: document.getElementById('regToken').value,
+      };
+
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem('grambi_token', data.token);
+          showDashboard(data.user);
+        } else {
+          showAuthAlert(data.error || 'Registration failed', 'error');
+        }
+      } catch (err) {
+        showAuthAlert('Network error during registration', 'error');
+      }
+    });
+
+    // Handle Login
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        email: document.getElementById('loginEmail').value,
+        password: document.getElementById('loginPassword').value,
+      };
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem('grambi_token', data.token);
+          showDashboard(data.user);
+        } else {
+          showAuthAlert(data.error || 'Invalid credentials', 'error');
+        }
+      } catch (err) {
+        showAuthAlert('Network error during login', 'error');
+      }
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('grambi_token');
+      document.getElementById('dashboardView').classList.add('hidden');
+      document.getElementById('authView').classList.remove('hidden');
+    });
+
+    // Show Dashboard
+    function showDashboard(user) {
+      document.getElementById('authView').classList.add('hidden');
+      document.getElementById('dashboardView').classList.remove('hidden');
+      document.getElementById('headerBusinessName').textContent = user.businessName || 'Business Portal';
+      loadCampaigns();
+    }
+
+    // Number parser
+    document.getElementById('recipientList').addEventListener('input', (e) => {
+      const numbers = parseNumbers(e.target.value);
+      document.getElementById('recipientCount').textContent = `${numbers.length} numbers`;
+    });
+
+    function parseNumbers(raw) {
+      return raw.split(/[\n,]+/).map(n => n.replace(/[^0-9]/g, '')).filter(n => n.length >= 10);
+    }
+
+    // Launch Broadcast
+    document.getElementById('launchBtn').addEventListener('click', async () => {
+      const token = localStorage.getItem('grambi_token');
+      const campaignName = document.getElementById('campaignName').value.trim();
+      const numbers = parseNumbers(document.getElementById('recipientList').value);
+
+      if (!campaignName || numbers.length === 0) {
+        showBroadcastAlert('Please provide a campaign title and at least 1 phone number.', 'error');
+        return;
+      }
+
+      const payload = {
+        campaignName,
+        templateName: 'order_update',
+        languageCode: 'en_US',
+        recipients: numbers.map(phoneNumber => ({ phoneNumber }))
+      };
+
+      try {
+        const res = await fetch('/api/messages/bulk', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          showBroadcastAlert(`🚀 Successfully launched broadcast to ${data.totalQueued} customers!`, 'success');
+          document.getElementById('recipientList').value = '';
+          document.getElementById('recipientCount').textContent = '0 numbers';
+          loadCampaigns();
+        } else {
+          showBroadcastAlert(data.error || 'Failed to dispatch broadcast', 'error');
+        }
+      } catch (e) {
+        showBroadcastAlert('Network error occurred', 'error');
+      }
+    });
+
+    // Load Campaigns
+    async function loadCampaigns() {
+      const token = localStorage.getItem('grambi_token');
+      if (!token) return;
+
+      const container = document.getElementById('campaignsContainer');
+      try {
+        const res = await fetch('/api/campaigns', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const campaigns = await res.json();
+
+        if (campaigns.length === 0) {
+          container.innerHTML = '<div class="text-center py-8 text-xs text-slate-400">No broadcasts sent yet.</div>';
+          return;
+        }
+
+        container.innerHTML = campaigns.map(c => {
+          const sent = c.summary.SENT || 0;
+          const delivered = c.summary.DELIVERED || 0;
+          const read = c.summary.READ || 0;
+          const failed = c.summary.FAILED || 0;
+          const pending = c.summary.PENDING || 0;
+
+          return `
+            <div class="border border-slate-100 rounded-xl p-4 bg-slate-50/50">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-900">${c.name}</span>
+                <span class="text-[10px] text-slate-400 font-mono">${new Date(c.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              <div class="flex items-center space-x-2 mt-3 text-[10px] font-semibold">
+                ${sent > 0 ? `<span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200">${sent} Sent</span>` : ''}
+                ${delivered > 0 ? `<span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-200">${delivered} Delivered</span>` : ''}
+                ${read > 0 ? `<span class="bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-200">${read} Read</span>` : ''}
+                ${failed > 0 ? `<span class="bg-rose-50 text-rose-700 px-2 py-0.5 rounded border border-rose-200">${failed} Failed</span>` : ''}
+                ${pending > 0 ? `<span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded border border-amber-200">${pending} Queued</span>` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function showAuthAlert(msg, type) {
+      const el = document.getElementById('authAlert');
+      el.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-800', 'bg-rose-50', 'text-rose-800');
+      el.classList.add(type === 'success' ? 'bg-emerald-50' : 'bg-rose-50', type === 'success' ? 'text-emerald-800' : 'text-rose-800');
+      el.textContent = msg;
+    }
+
+    function showBroadcastAlert(msg, type) {
+      const el = document.getElementById('broadcastAlert');
+      el.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-800', 'bg-rose-50', 'text-rose-800');
+      el.classList.add(type === 'success' ? 'bg-emerald-50' : 'bg-rose-50', type === 'success' ? 'text-emerald-800' : 'text-rose-800');
+      el.textContent = msg;
+    }
+
+    // Auto Login on startup if token exists
+    window.addEventListener('load', async () => {
+      const token = localStorage.getItem('grambi_token');
+      if (token) {
+        try {
+          const res = await fetch('/api/auth/profile', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const user = await res.json();
+            showDashboard(user);
+          } else {
+            localStorage.removeItem('grambi_token');
+          }
+        } catch (e) {
+          localStorage.removeItem('grambi_token');
+        }
+      }
+    });
+
+    document.getElementById('refreshReports').addEventListener('click', loadCampaigns);
+    setInterval(loadCampaigns, 5000);
+  </script>
+</body>
+</html>
