@@ -230,11 +230,11 @@
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const payload = {
-        businessName: document.getElementById('regBusinessName').value,
-        email: document.getElementById('regEmail').value,
+        businessName: document.getElementById('regBusinessName').value.trim(),
+        email: document.getElementById('regEmail').value.trim(),
         password: document.getElementById('regPassword').value,
-        phoneNumberId: document.getElementById('regPhoneId').value,
-        accessToken: document.getElementById('regToken').value,
+        phoneNumberId: document.getElementById('regPhoneId').value.trim(),
+        accessToken: document.getElementById('regToken').value.trim(),
       };
 
       try {
@@ -248,10 +248,20 @@
           localStorage.setItem('grambi_token', data.token);
           showDashboard(data.user);
         } else {
-          showAuthAlert(data.error || 'Registration failed', 'error');
+          // Extract specific error message
+          let errMsg = 'Registration failed';
+          if (typeof data.error === 'string') {
+            errMsg = data.error;
+          } else if (data.error && typeof data.error === 'object') {
+            const keys = Object.keys(data.error);
+            if (keys.length > 0 && data.error[keys[0]]?._errors) {
+              errMsg = `${keys[0]}: ${data.error[keys[0]]._errors.join(', ')}`;
+            }
+          }
+          showAuthAlert(errMsg, 'error');
         }
       } catch (err) {
-        showAuthAlert('Network error during registration', 'error');
+        showAuthAlert('Network error: ' + (err.message || 'Cannot reach server'), 'error');
       }
     });
 
