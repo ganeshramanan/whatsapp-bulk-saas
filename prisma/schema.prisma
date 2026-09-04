@@ -13,10 +13,14 @@ model User {
   password      String
   businessName  String
   
-  // Meta Cloud API Credentials (configured once during setup)
+  // WhatsApp Cloud API Credentials
   wabaId        String?
   phoneNumberId String?
   accessToken   String?
+  
+  // Wallet Balance & Pricing (Multi-tenant SaaS Billing)
+  walletBalance Float           @default(50.0) // Gives ₹50 free credits on signup!
+  pricePerMessage Float         @default(1.0)  // ₹1.00 per message (Meta cost ₹0.78 + your profit)
   
   createdAt     DateTime        @default(now())
   campaigns     Campaign[]

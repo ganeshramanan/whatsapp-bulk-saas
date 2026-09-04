@@ -103,6 +103,8 @@ export const getProfile = async (req: AuthRequest, res: Response) => {
       businessName: true,
       phoneNumberId: true,
       wabaId: true,
+      walletBalance: true,
+      pricePerMessage: true,
       createdAt: true,
     },
   });
