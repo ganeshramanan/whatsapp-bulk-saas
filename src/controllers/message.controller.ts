@@ -79,30 +79,13 @@ export const sendBulkMessages = async (req: AuthRequest, res: Response) => {
 
   const { campaignName, templateName, messageText, languageCode, recipients } = parseResult.data;
 
-  // 1. Fetch the logged-in customer's Meta credentials & Wallet Balance
+  // 1. Fetch the logged-in customer's Meta credentials
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user || !user.phoneNumberId || !user.accessToken) {
     return res.status(400).json({
       error: 'WhatsApp credentials missing on your account. Please contact support.',
     });
   }
-
-  const pricePerMessage = user.pricePerMessage || 1.0;
-  const totalCost = recipients.length * pricePerMessage;
-
-  // Check if user has enough balance
-  if (user.walletBalance < totalCost) {
-    const maxPossible = Math.floor(user.walletBalance / pricePerMessage);
-    return res.status(402).json({
-      error: `Insufficient wallet balance. Required: ₹${totalCost.toFixed(2)}, Available: ₹${user.walletBalance.toFixed(2)}. You can only send to ${maxPossible} numbers. Please top up your wallet.`,
-    });
-  }
-
-  // Deduct wallet balance
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { walletBalance: { decrement: totalCost } },
-  });
 
   // 2. Create campaign record linked to this customer
   const campaign = await prisma.campaign.create({
