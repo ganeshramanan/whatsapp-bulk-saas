@@ -61,6 +61,7 @@ export const register = async (req: Request, res: Response) => {
       id: user.id,
       email: user.email,
       businessName: user.businessName,
+      role: user.role,
       phoneNumberId: user.phoneNumberId,
     },
   });
@@ -93,6 +94,7 @@ export const login = async (req: Request, res: Response) => {
       id: user.id,
       email: user.email,
       businessName: user.businessName,
+      role: user.role,
       phoneNumberId: user.phoneNumberId,
     },
   });
