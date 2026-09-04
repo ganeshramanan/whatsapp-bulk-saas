@@ -32,7 +32,7 @@ app.post('/api/messages/bulk', authMiddleware, sendBulkMessages);
 app.get('/api/campaigns', authMiddleware, listCustomerCampaigns);
 app.get('/api/campaigns/:id', authMiddleware, getCampaignDetails);
 
-// Instant Sandbox Test Route (No Template Approval Required!)
+// Instant Sandbox Test Route (Uses the Customer's Registered Phone Number ID)
 app.post('/api/messages/sandbox-test', authMiddleware, async (req: AuthRequest, res: express.Response) => {
   const userId = req.userId;
   const { recipientNumber } = req.body;
@@ -41,17 +41,15 @@ app.post('/api/messages/sandbox-test', authMiddleware, async (req: AuthRequest, 
     return res.status(400).json({ error: 'recipientNumber is required.' });
   }
 
-  // Uses Meta Public Sandbox Phone Number ID
-  const SANDBOX_PHONE_ID = '1063255519739985'; 
   const dbUser = await prisma.user.findUnique({ where: { id: userId } });
 
-  if (!dbUser || !dbUser.accessToken) {
-    return res.status(400).json({ error: 'Please save your access token first.' });
+  if (!dbUser || !dbUser.phoneNumberId || !dbUser.accessToken) {
+    return res.status(400).json({ error: 'Please configure your Phone Number ID and Access Token.' });
   }
 
   try {
     const result = await waService.sendTemplateMessage({
-      phoneNumberId: SANDBOX_PHONE_ID,
+      phoneNumberId: dbUser.phoneNumberId,
       token: dbUser.accessToken,
       to: recipientNumber.replace(/[^0-9]/g, ''),
       templateName: 'hello_world',
