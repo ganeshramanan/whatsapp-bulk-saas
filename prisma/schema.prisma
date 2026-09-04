@@ -12,6 +12,7 @@ model User {
   email         String          @unique
   password      String
   businessName  String
+  role          String          @default("CUSTOMER") // "ADMIN" or "CUSTOMER"
   
   // WhatsApp Cloud API Credentials
   wabaId        String?

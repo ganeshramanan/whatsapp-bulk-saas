@@ -126,7 +126,12 @@
           </div>
         </div>
 
-        <div class="flex items-center space-x-2 sm:space-x-4">
+        <div class="flex items-center space-x-2 sm:space-x-3">
+          <!-- Admin Portal Switcher (Visible only if user.role === 'ADMIN') -->
+          <button id="adminPortalBtn" class="hidden text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-xl hover:bg-indigo-100 transition flex items-center space-x-1.5">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-indigo-600"></i>
+            <span>Admin Portal</span>
+          </button>
           <span class="inline-flex items-center px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
             <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
             Active
@@ -214,6 +219,31 @@
       </div>
 
     </main>
+  </div>
+
+  <!-- ================= ADMIN PORTAL MODAL / VIEW ================= -->
+  <div id="adminModal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Customer Management Portal</h3>
+            <p class="text-xs text-slate-400">View and manage registered businesses</p>
+          </div>
+        </div>
+        <button id="closeAdminModalBtn" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Customer List Table -->
+      <div class="flex-1 overflow-y-auto space-y-3" id="adminCustomerList">
+        <div class="text-center py-8 text-xs text-slate-400">Loading customers...</div>
+      </div>
+    </div>
   </div>
 
   <!-- JavaScript Client Logic -->
@@ -318,9 +348,12 @@
       document.getElementById('dashboardView').classList.remove('hidden');
       document.getElementById('headerBusinessName').textContent = user.businessName || 'Business Portal';
       
-      // Update wallet balance badge in UI
-      if (user.walletBalance !== undefined) {
-        document.getElementById('userWalletBalance').textContent = `₹${user.walletBalance.toFixed(2)}`;
+      // Show Admin Portal Button if user is ADMIN
+      const adminBtn = document.getElementById('adminPortalBtn');
+      if (user.role === 'ADMIN') {
+        adminBtn.classList.remove('hidden');
+      } else {
+        adminBtn.classList.add('hidden');
       }
       
       // Clear any previous alert banners on fresh login
@@ -330,6 +363,91 @@
       
       loadCampaigns();
       fetchMetaTemplates(); // Dynamically fetch Meta templates
+    }
+
+    // Admin Portal Logic
+    const adminModal = document.getElementById('adminModal');
+    const adminPortalBtn = document.getElementById('adminPortalBtn');
+    const closeAdminModalBtn = document.getElementById('closeAdminModalBtn');
+
+    adminPortalBtn.addEventListener('click', () => {
+      adminModal.classList.remove('hidden');
+      loadAdminCustomers();
+    });
+
+    closeAdminModalBtn.addEventListener('click', () => {
+      adminModal.classList.add('hidden');
+    });
+
+    async function loadAdminCustomers() {
+      const token = localStorage.getItem('grambi_token');
+      const listContainer = document.getElementById('adminCustomerList');
+      listContainer.innerHTML = '<div class="text-center py-8 text-xs text-slate-400">Loading customers...</div>';
+
+      try {
+        const res = await fetch('/api/admin/customers', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (handleUnauthorized(res)) return;
+
+        const data = await res.json();
+        const customers = data.customers || [];
+
+        if (customers.length === 0) {
+          listContainer.innerHTML = '<div class="text-center py-8 text-xs text-slate-400">No customers registered yet.</div>';
+          return;
+        }
+
+        listContainer.innerHTML = customers.map(c => `
+          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3 hover:border-slate-300 transition">
+            <div class="min-w-0">
+              <div class="flex items-center space-x-2">
+                <span class="text-xs sm:text-sm font-bold text-slate-900 truncate">${c.businessName}</span>
+                ${c.role === 'ADMIN' ? '<span class="bg-indigo-100 text-indigo-700 text-[9px] font-bold px-2 py-0.5 rounded-md">ADMIN</span>' : ''}
+              </div>
+              <p class="text-[11px] text-slate-500 truncate mt-0.5">${c.email}</p>
+              <div class="flex items-center space-x-3 text-[10px] text-slate-400 font-mono mt-1">
+                <span>Phone ID: ${c.phoneNumberId || 'Not set'}</span>
+                <span>• ${c._count?.campaigns || 0} Campaigns</span>
+              </div>
+            </div>
+            ${c.role !== 'ADMIN' ? `
+              <button onclick="deleteCustomerAccount('${c.id}', '${c.businessName.replace(/'/g, "\\'")}')" 
+                      class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-xl border border-rose-200 transition shrink-0 flex items-center space-x-1">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <span class="hidden sm:inline">Delete</span>
+              </button>
+            ` : ''}
+          </div>
+        `).join('');
+        lucide.createIcons();
+      } catch (err) {
+        listContainer.innerHTML = '<div class="text-center py-4 text-xs text-rose-500">Failed to load customer list.</div>';
+      }
+    }
+
+    async function deleteCustomerAccount(id, name) {
+      if (!confirm(`Are you sure you want to delete "${name}"? This will permanently erase all their campaigns and credentials.`)) {
+        return;
+      }
+
+      const token = localStorage.getItem('grambi_token');
+      try {
+        const res = await fetch(`/api/admin/customers/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          loadAdminCustomers();
+          showBroadcastAlert(`Customer "${name}" deleted successfully.`, 'success');
+        } else {
+          const data = await res.json();
+          alert(data.error || 'Failed to delete customer');
+        }
+      } catch (err) {
+        alert('Error deleting customer account.');
+      }
     }
 
     // Dynamically Fetch Live Templates from Meta API

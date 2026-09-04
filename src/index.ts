@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import dotenv from 'dotenv';
-import { register, login, getProfile } from './controllers/auth.controller';
+import { register, login, getProfile, listAllCustomers, deleteCustomer } from './controllers/auth.controller';
 import { sendBulkMessages, listCustomerCampaigns, getCampaignDetails, getCustomerTemplates } from './controllers/message.controller';
 import { verifyWebhook, handleWebhookEvents } from './controllers/webhook.controller';
 import { authMiddleware, AuthRequest } from './middlewares/auth.middleware';
@@ -26,6 +26,10 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.post('/api/auth/register', register);
 app.post('/api/auth/login', login);
 app.get('/api/auth/profile', authMiddleware, getProfile);
+
+// Admin Management Routes
+app.get('/api/admin/customers', authMiddleware, listAllCustomers);
+app.delete('/api/admin/customers/:id', authMiddleware, deleteCustomer);
 
 // Authenticated Campaign Routes
 app.get('/api/templates', authMiddleware, getCustomerTemplates);

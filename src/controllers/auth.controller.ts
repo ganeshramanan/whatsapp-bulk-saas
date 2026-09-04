@@ -37,11 +37,15 @@ export const register = async (req: Request, res: Response) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
+  const userCount = await prisma.user.count();
+  const role = userCount === 0 ? 'ADMIN' : 'CUSTOMER';
+
   const user = await prisma.user.create({
     data: {
       email,
       password: hashedPassword,
       businessName,
+      role,
       phoneNumberId,
       wabaId: wabaId || null,
       accessToken,
@@ -101,10 +105,9 @@ export const getProfile = async (req: AuthRequest, res: Response) => {
       id: true,
       email: true,
       businessName: true,
+      role: true,
       phoneNumberId: true,
       wabaId: true,
-      walletBalance: true,
-      pricePerMessage: true,
       createdAt: true,
     },
   });
@@ -114,4 +117,47 @@ export const getProfile = async (req: AuthRequest, res: Response) => {
   }
 
   return res.json(user);
+};
+
+// ================= ADMIN CONTROLLERS =================
+
+// List all customers for the Admin
+export const listAllCustomers = async (req: AuthRequest, res: Response) => {
+  const admin = await prisma.user.findUnique({ where: { id: req.userId } });
+  if (!admin || admin.role !== 'ADMIN') {
+    return res.status(403).json({ error: 'Access denied. Admin only.' });
+  }
+
+  const customers = await prisma.user.findMany({
+    orderBy: { createdAt: 'desc' },
+    select: {
+      id: true,
+      email: true,
+      businessName: true,
+      role: true,
+      phoneNumberId: true,
+      createdAt: true,
+      _count: {
+        select: { campaigns: true }
+      }
+    }
+  });
+
+  return res.json({ customers });
+};
+
+// Delete a customer account (Admin only)
+export const deleteCustomer = async (req: AuthRequest, res: Response) => {
+  const admin = await prisma.user.findUnique({ where: { id: req.userId } });
+  if (!admin || admin.role !== 'ADMIN') {
+    return res.status(403).json({ error: 'Access denied. Admin only.' });
+  }
+
+  const { id } = req.params;
+  if (id === admin.id) {
+    return res.status(400).json({ error: 'You cannot delete your own admin account.' });
+  }
+
+  await prisma.user.delete({ where: { id } });
+  return res.json({ success: true, message: 'Customer account deleted successfully.' });
 };
