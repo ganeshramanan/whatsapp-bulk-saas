@@ -131,7 +131,7 @@
           </div>
           <div class="truncate max-w-[140px] sm:max-w-xs">
             <h1 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight truncate" id="headerBusinessName">My Business</h1>
-            <button onclick="toggleProductsSuite(true)" class="text-[10px] text-emerald-700 font-bold hover:underline flex items-center space-x-0.5 cursor-pointer">
+            <button id="grambiSuiteBtn" onclick="toggleProductsSuite(true)" type="button" class="text-[10px] text-emerald-700 font-bold hover:underline flex items-center space-x-0.5 cursor-pointer">
               <span>Grambi Suite</span>
               <i data-lucide="chevron-down" class="w-2.5 h-2.5"></i>
             </button>
@@ -263,10 +263,16 @@
               <i data-lucide="bar-chart-2" class="w-5 h-5 text-emerald-600"></i>
               <h2 class="text-sm sm:text-base font-bold text-slate-900">Broadcast History</h2>
             </div>
-            <button id="refreshReports" class="text-xs text-slate-500 hover:text-slate-900 flex items-center space-x-1 p-1.5 rounded-lg hover:bg-slate-100 transition">
-              <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
-              <span class="hidden sm:inline">Refresh</span>
-            </button>
+            <div class="flex items-center space-x-2">
+              <button id="sandboxTestBtn" type="button" class="text-[11px] font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-2.5 py-1 rounded-xl flex items-center space-x-1 transition">
+                <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-600"></i>
+                <span>Test 1</span>
+              </button>
+              <button id="refreshReports" class="text-xs text-slate-500 hover:text-slate-900 flex items-center space-x-1 p-1.5 rounded-lg hover:bg-slate-100 transition">
+                <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+                <span class="hidden sm:inline">Refresh</span>
+              </button>
+            </div>
           </div>
 
           <div id="campaignsContainer" class="mt-4 space-y-3 max-h-[450px] overflow-y-auto pr-1">
@@ -755,35 +761,38 @@
     });
 
     // Instant Sandbox Test (No Template Review Needed)
-    document.getElementById('sandboxTestBtn').addEventListener('click', async () => {
-      const token = localStorage.getItem('grambi_token');
-      const numbers = parseNumbers(document.getElementById('recipientList').value);
+    const sandboxTestBtn = document.getElementById('sandboxTestBtn');
+    if (sandboxTestBtn) {
+      sandboxTestBtn.addEventListener('click', async () => {
+        const token = localStorage.getItem('grambi_token');
+        const numbers = parseNumbers(document.getElementById('recipientList').value);
 
-      if (numbers.length === 0) {
-        showBroadcastAlert('Please paste at least 1 verified test phone number.', 'error');
-        return;
-      }
-
-      try {
-        const res = await fetch('/api/messages/sandbox-test', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({ recipientNumber: numbers[0] }),
-        });
-
-        const data = await res.json();
-        if (res.ok) {
-          showBroadcastAlert(`⚡ Instant test message sent successfully to ${numbers[0]}!`, 'success');
-        } else {
-          showBroadcastAlert(data.error || 'Failed to send sandbox test', 'error');
+        if (numbers.length === 0) {
+          showBroadcastAlert('Please paste at least 1 verified test phone number.', 'error');
+          return;
         }
-      } catch (err) {
-        showBroadcastAlert('Network error during sandbox test', 'error');
-      }
-    });
+
+        try {
+          const res = await fetch('/api/messages/sandbox-test', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ recipientNumber: numbers[0] }),
+          });
+
+          const data = await res.json();
+          if (res.ok) {
+            showBroadcastAlert(`⚡ Instant test message sent successfully to ${numbers[0]}!`, 'success');
+          } else {
+            showBroadcastAlert(data.error || 'Failed to send sandbox test', 'error');
+          }
+        } catch (err) {
+          showBroadcastAlert('Network error during sandbox test', 'error');
+        }
+      });
+    }
 
     // Load Campaigns with Modern Visual Analytics Cards & Progress Bars
     async function loadCampaigns() {
