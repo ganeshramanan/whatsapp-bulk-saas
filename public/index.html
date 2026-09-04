@@ -184,9 +184,10 @@
           <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
             <div class="flex items-center justify-between">
               <span class="text-xs font-semibold text-slate-700">Template Used</span>
-              <span class="text-xs font-mono bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">order_update</span>
+              <input id="customTemplateName" type="text" value="hello_world"
+                     class="text-xs font-mono bg-white border border-slate-200 px-2.5 py-1 rounded-lg text-emerald-800 focus:outline-none focus:ring-1 focus:ring-emerald-500" />
             </div>
-            <p class="text-[11px] text-slate-500 mt-1">Pre-approved Meta business template applied automatically to guarantee 100% inbox delivery.</p>
+            <p class="text-[11px] text-slate-500 mt-1">Use <code class="text-emerald-700 font-bold">hello_world</code> for Test Sandbox number, or <code class="text-emerald-700 font-bold">order_update</code> once your production template is approved.</p>
           </div>
 
           <!-- Phone Numbers Input -->
@@ -351,6 +352,7 @@
     document.getElementById('launchBtn').addEventListener('click', async () => {
       const token = localStorage.getItem('grambi_token');
       const campaignName = document.getElementById('campaignName').value.trim();
+      const templateName = document.getElementById('customTemplateName').value.trim() || 'hello_world';
       const numbers = parseNumbers(document.getElementById('recipientList').value);
 
       if (!campaignName || numbers.length === 0) {
@@ -360,7 +362,7 @@
 
       const payload = {
         campaignName,
-        templateName: 'order_update',
+        templateName,
         languageCode: 'en_US',
         recipients: numbers.map(phoneNumber => ({ phoneNumber }))
       };
