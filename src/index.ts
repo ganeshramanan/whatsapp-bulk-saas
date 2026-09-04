@@ -32,6 +32,37 @@ app.post('/api/messages/bulk', authMiddleware, sendBulkMessages);
 app.get('/api/campaigns', authMiddleware, listCustomerCampaigns);
 app.get('/api/campaigns/:id', authMiddleware, getCampaignDetails);
 
+// Update Customer Meta Phone ID / Token Route
+app.put('/api/auth/profile', authMiddleware, async (req: AuthRequest, res: express.Response) => {
+  const userId = req.userId;
+  const { businessName, phoneNumberId, accessToken, wabaId } = req.body;
+
+  try {
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        businessName: businessName || undefined,
+        phoneNumberId: phoneNumberId || undefined,
+        accessToken: accessToken || undefined,
+        wabaId: wabaId || undefined,
+      },
+    });
+
+    return res.json({
+      success: true,
+      message: 'Account settings updated successfully!',
+      user: {
+        id: updated.id,
+        email: updated.email,
+        businessName: updated.businessName,
+        phoneNumberId: updated.phoneNumberId,
+      },
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to update profile.' });
+  }
+});
+
 // Instant Sandbox Test Route (Uses the Customer's Registered Phone Number ID)
 app.post('/api/messages/sandbox-test', authMiddleware, async (req: AuthRequest, res: express.Response) => {
   const userId = req.userId;
