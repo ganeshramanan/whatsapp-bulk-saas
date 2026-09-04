@@ -5,8 +5,8 @@ services:
     runtime: node
     plan: free
     autoDeploy: false
-    buildCommand: npm install && npx prisma generate && npm run build
-    startCommand: npx prisma db push && node dist/index.js
+    buildCommand: sed -i 's/provider = "sqlite"/provider = "postgresql"/g' prisma/schema.prisma && npm install && npx prisma generate && npm run build
+    startCommand: sed -i 's/provider = "sqlite"/provider = "postgresql"/g' prisma/schema.prisma && npx prisma db push && node dist/index.js
     envVars:
       - key: PORT
         value: 3000
