@@ -131,7 +131,7 @@
           </div>
           <div class="truncate max-w-[140px] sm:max-w-xs">
             <h1 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight truncate" id="headerBusinessName">My Business</h1>
-            <button id="openProductsSuiteBtn" class="text-[10px] text-emerald-700 font-bold hover:underline flex items-center space-x-0.5">
+            <button onclick="toggleProductsSuite(true)" class="text-[10px] text-emerald-700 font-bold hover:underline flex items-center space-x-0.5 cursor-pointer">
               <span>Grambi Suite</span>
               <i data-lucide="chevron-down" class="w-2.5 h-2.5"></i>
             </button>
@@ -279,7 +279,7 @@
   </div>
 
   <!-- ================= PRODUCT SUITE / HUB SELECTOR MODAL ================= -->
-  <div id="productsModal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+  <div id="productsModal" class="hidden fixed inset-0 bg-slate-900/60 z-[9999] flex items-center justify-center p-4 backdrop-blur-xs">
     <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center space-x-2.5">
@@ -291,7 +291,8 @@
             <p class="text-xs text-slate-400">Select an application from your ecosystem</p>
           </div>
         </div>
-        <button id="closeProductsModalBtn" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition">
+        <!-- Modal Close Button -->
+        <button onclick="toggleProductsSuite(false)" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition cursor-pointer">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -1020,17 +1021,15 @@
     setInterval(loadCampaigns, 5000);
 
     // Products Suite App Switcher Modal Logic
-    const productsModal = document.getElementById('productsModal');
-    const openProductsSuiteBtn = document.getElementById('openProductsSuiteBtn');
-    const closeProductsModalBtn = document.getElementById('closeProductsModalBtn');
-
-    openProductsSuiteBtn.addEventListener('click', () => {
-      productsModal.classList.remove('hidden');
-    });
-
-    closeProductsModalBtn.addEventListener('click', () => {
-      productsModal.classList.add('hidden');
-    });
+    window.toggleProductsSuite = function(show) {
+      const modal = document.getElementById('productsModal');
+      if (!modal) return;
+      if (show) {
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    };
 
     // ================= PWA REGISTRATION & INSTALLATION =================
     if ('serviceWorker' in navigator) {

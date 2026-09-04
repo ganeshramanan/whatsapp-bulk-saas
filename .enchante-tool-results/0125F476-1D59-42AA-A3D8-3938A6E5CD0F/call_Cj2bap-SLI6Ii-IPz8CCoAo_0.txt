@@ -1,0 +1,982 @@
+index.html (1073 lines, 52 KB)
+[Showing lines 95-1073 of 1073. Use offset/limit for more.]
+
+  95	                   class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition" />
+  96	          </div>
+  97	        </div>
+  98	
+  99	        <div class="pt-3 border-t border-slate-100 space-y-2.5">
+ 100	          <p class="text-[11px] font-bold text-slate-800 uppercase tracking-wider">WhatsApp Meta Setup (One-Time)</p>
+ 101	          <div>
+ 102	            <label class="block text-[11px] font-medium text-slate-600 mb-1">Phone Number ID</label>
+ 103	            <input id="regPhoneId" type="text" required placeholder="1269930609537457 or Test ID"
+ 104	                   class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition" />
+ 105	          </div>
+ 106	          <div>
+ 107	            <label class="block text-[11px] font-medium text-slate-600 mb-1">Permanent Access Token</label>
+ 108	            <input id="regToken" type="password" required placeholder="EAAG..."
+ 109	                   class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition" />
+ 110	          </div>
+ 111	        </div>
+ 112	
+ 113	        <button type="submit" class="w-full bg-emerald-600 active:bg-emerald-700 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-emerald-600/25 transition mt-2">
+ 114	          Create Account & Connect
+ 115	        </button>
+ 116	      </form>
+ 117	
+ 118	      <div id="authAlert" class="hidden mt-4 p-3.5 rounded-2xl text-xs font-medium"></div>
+ 119	    </div>
+ 120	  </div>
+ 121	
+ 122	  <!-- ================= DASHBOARD VIEW (100% Mobile & Touch Friendly) ================= -->
+ 123	  <div id="dashboardView" class="hidden flex-1 flex flex-col">
+ 124	    
+ 125	    <!-- Top Bar -->
+ 126	    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+ 127	      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
+ 128	        <div class="flex items-center space-x-2.5">
+ 129	          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-sm sm:text-base shadow-sm">
+ 130	            G
+ 131	          </div>
+ 132	          <div class="truncate max-w-[140px] sm:max-w-xs">
+ 133	            <h1 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight truncate" id="headerBusinessName">My Business</h1>
+ 134	            <button onclick="toggleProductsSuite(true)" class="text-[10px] text-emerald-700 font-bold hover:underline flex items-center space-x-0.5 cursor-pointer">
+ 135	              <span>Grambi Suite</span>
+ 136	              <i data-lucide="chevron-down" class="w-2.5 h-2.5"></i>
+ 137	            </button>
+ 138	          </div>
+ 139	        </div>
+ 140	
+ 141	        <div class="flex items-center space-x-2 sm:space-x-3">
+ 142	          <!-- PWA Install Button (Shown on mobile browsers) -->
+ 143	          <button id="pwaInstallBtn" class="hidden text-xs font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-300 px-3 py-1.5 rounded-xl hover:bg-emerald-200 transition flex items-center space-x-1.5">
+ 144	            <i data-lucide="download-cloud" class="w-3.5 h-3.5 text-emerald-700"></i>
+ 145	            <span class="hidden sm:inline">Install App</span>
+ 146	            <span class="sm:hidden">Install</span>
+ 147	          </button>
+ 148	          
+ 149	          <!-- Admin Portal Switcher (Visible only if user.role === 'ADMIN') -->
+ 150	          <button id="adminPortalBtn" class="hidden text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-xl hover:bg-indigo-100 transition flex items-center space-x-1.5">
+ 151	            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-indigo-600"></i>
+ 152	            <span>Admin Portal</span>
+ 153	          </button>
+ 154	          <span class="inline-flex items-center px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+ 155	            <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+ 156	            Active
+ 157	          </span>
+ 158	          <button id="logoutBtn" class="p-2 sm:px-3 sm:py-1.5 text-xs font-medium text-slate-500 hover:text-rose-600 rounded-lg hover:bg-rose-50 flex items-center space-x-1 transition">
+ 159	            <i data-lucide="log-out" class="w-4 h-4"></i>
+ 160	            <span class="hidden sm:inline">Logout</span>
+ 161	          </button>
+ 162	        </div>
+ 163	      </div>
+ 164	    </header>
+ 165	
+ 166	    <!-- Main Content Area -->
+ 167	    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 w-full">
+ 168	      
+ 169	      <!-- Broadcast Sender Box (7 cols on desktop, full width on mobile) -->
+ 170	      <div class="lg:col-span-7 space-y-4 sm:space-y-6">
+ 171	        <div class="bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200 space-y-4 sm:space-y-5">
+ 172	          <div class="flex items-center space-x-2 pb-3 border-b border-slate-100">
+ 173	            <i data-lucide="send" class="w-5 h-5 text-emerald-600"></i>
+ 174	            <h2 class="text-sm sm:text-base font-bold text-slate-900">Send WhatsApp Broadcast</h2>
+ 175	          </div>
+ 176	
+ 177	          <!-- Campaign Name -->
+ 178	          <div>
+ 179	            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Campaign Title</label>
+ 180	            <input id="campaignName" type="text" placeholder="e.g. Weekend Discount Blast"
+ 181	                   class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition" />
+ 182	          </div>
+ 183	
+ 184	          <!-- Template Selector Dropdown -->
+ 185	          <div>
+ 186	            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Select Message Template</label>
+ 187	            <div class="relative">
+ 188	              <select id="customTemplateName"
+ 189	                      class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-2xl font-medium text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none cursor-pointer transition">
+ 190	                <option value="hello_world">⚡️ hello_world (Sandbox Test)</option>
+ 191	                <option value="order_update">📦 order_update (Production)</option>
+ 192	              </select>
+ 193	              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+ 194	                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+ 195	              </div>
+ 196	            </div>
+ 197	          </div>
+ 198	
+ 199	          <!-- Live WhatsApp Message Bubble Preview -->
+ 200	          <div class="bg-slate-100/70 p-3.5 rounded-2xl border border-slate-200/80 space-y-1.5">
+ 201	            <div class="flex items-center justify-between">
+ 202	              <span class="text-[11px] font-bold text-slate-600 flex items-center space-x-1">
+ 203	                <i data-lucide="smartphone" class="w-3.5 h-3.5 text-emerald-600"></i>
+ 204	                <span>Customer WhatsApp Preview</span>
+ 205	              </span>
+ 206	              <span class="text-[10px] text-emerald-700 bg-emerald-100/70 font-semibold px-2 py-0.5 rounded-full">Official Message</span>
+ 207	            </div>
+ 208	            <div class="bg-[#d9fdd3] text-slate-900 text-xs p-3 rounded-2xl rounded-tr-xs shadow-xs border border-emerald-200/40 relative">
+ 209	              <p id="previewMessageText" class="leading-relaxed">
+ 210	                Hello World! Welcome and congratulations on receiving this message from WhatsApp Business Platform.
+ 211	              </p>
+ 212	              <div class="text-[9px] text-slate-400 text-right mt-1 font-mono flex items-center justify-end space-x-1">
+ 213	                <span>12:00 PM</span>
+ 214	                <span class="text-blue-500">✓✓</span>
+ 215	              </div>
+ 216	            </div>
+ 217	          </div>
+ 218	
+ 219	          <!-- Phone Numbers Input & CSV Upload Trigger -->
+ 220	          <div>
+ 221	            <div class="flex items-center justify-between mb-1.5">
+ 222	              <label class="block text-xs font-semibold text-slate-700">Paste or Upload Phone Numbers</label>
+ 223	              <div class="flex items-center space-x-2">
+ 224	                <input type="file" id="csvFileInput" accept=".csv,.txt,.xlsx" class="hidden" />
+ 225	                <button type="button" id="uploadCsvBtn" class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-xl flex items-center space-x-1 transition">
+ 226	                  <i data-lucide="file-up" class="w-3.5 h-3.5"></i>
+ 227	                  <span>Import CSV</span>
+ 228	                </button>
+ 229	                <span id="recipientCount" class="text-xs text-emerald-600 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">0 numbers</span>
+ 230	              </div>
+ 231	            </div>
+ 232	            <p class="text-[11px] text-slate-400 mb-2">Paste numbers with country code or import a CSV/TXT file. E.g. 919876543210</p>
+ 233	            <textarea id="recipientList" rows="5" placeholder="919962761010&#10;918056132037&#10;919876543210"
+ 234	                      class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono transition"></textarea>
+ 235	          </div>
+ 236	
+ 237	          <!-- Phone Number Duplicate Cleaner -->
+ 238	          <div class="flex items-center justify-between pt-1">
+ 239	            <button type="button" id="cleanDuplicatesBtn" class="text-[11px] text-slate-500 hover:text-emerald-700 font-semibold flex items-center space-x-1 transition">
+ 240	              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i>
+ 241	              <span>Remove Duplicates & Format Numbers</span>
+ 242	            </button>
+ 243	            <button type="button" id="clearNumbersBtn" class="text-[11px] text-slate-400 hover:text-rose-600 font-medium transition">
+ 244	              Clear All
+ 245	            </button>
+ 246	          </div>
+ 247	
+ 248	          <!-- Launch Button (Big, touch-friendly for mobile) -->
+ 249	          <button id="launchBtn" class="w-full bg-emerald-600 active:bg-emerald-700 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-emerald-600/25 transition flex items-center justify-center space-x-2">
+ 250	            <i data-lucide="rocket" class="w-5 h-5"></i>
+ 251	            <span>Launch WhatsApp Broadcast</span>
+ 252	          </button>
+ 253	
+ 254	          <div id="broadcastAlert" class="hidden p-4 rounded-2xl text-xs font-semibold"></div>
+ 255	        </div>
+ 256	      </div>
+ 257	
+ 258	      <!-- Real-Time Reports & History (5 cols) -->
+ 259	      <div class="lg:col-span-5 space-y-4 sm:space-y-6">
+ 260	        <div class="bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200">
+ 261	          <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+ 262	            <div class="flex items-center space-x-2">
+ 263	              <i data-lucide="bar-chart-2" class="w-5 h-5 text-emerald-600"></i>
+ 264	              <h2 class="text-sm sm:text-base font-bold text-slate-900">Broadcast History</h2>
+ 265	            </div>
+ 266	            <button id="refreshReports" class="text-xs text-slate-500 hover:text-slate-900 flex items-center space-x-1 p-1.5 rounded-lg hover:bg-slate-100 transition">
+ 267	              <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+ 268	              <span class="hidden sm:inline">Refresh</span>
+ 269	            </button>
+ 270	          </div>
+ 271	
+ 272	          <div id="campaignsContainer" class="mt-4 space-y-3 max-h-[450px] overflow-y-auto pr-1">
+ 273	            <div class="text-center py-8 text-xs text-slate-400">Loading your history...</div>
+ 274	          </div>
+ 275	        </div>
+ 276	      </div>
+ 277	
+ 278	    </main>
+ 279	  </div>
+ 280	
+ 281	  <!-- ================= PRODUCT SUITE / HUB SELECTOR MODAL ================= -->
+ 282	  <div id="productsModal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+ 283	    <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5">
+ 284	      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+ 285	        <div class="flex items-center space-x-2.5">
+ 286	          <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">
+ 287	            <i data-lucide="grid" class="w-4 h-4"></i>
+ 288	          </div>
+ 289	          <div>
+ 290	            <h3 class="text-base font-bold text-slate-900">Grambi Business Suite</h3>
+ 291	            <p class="text-xs text-slate-400">Select an application from your ecosystem</p>
+ 292	          </div>
+ 293	        </div>
+ 294	        <!-- Modal Close Button -->
+ 295	        <button onclick="toggleProductsSuite(false)" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition cursor-pointer">
+ 296	          <i data-lucide="x" class="w-5 h-5"></i>
+ 297	        </button>
+ 298	      </div>
+ 299	
+ 300	      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+ 301	        <!-- Product 1: WhatsApp Broadcaster (ACTIVE) -->
+ 302	        <div class="p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50/40 relative space-y-1.5 cursor-pointer">
+ 303	          <span class="absolute top-3 right-3 bg-emerald-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Active</span>
+ 304	          <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold mb-2">
+ 305	            <i data-lucide="message-square" class="w-4 h-4"></i>
+ 306	          </div>
+ 307	          <h4 class="text-xs sm:text-sm font-bold text-slate-900">WhatsApp Broadcaster</h4>
+ 308	          <p class="text-[11px] text-slate-500 leading-tight">Official Meta Cloud API bulk sender, delivery tracking & CSV imports.</p>
+ 309	        </div>
+ 310	
+ 311	        <!-- Product 2: AI Support Chatbot (COMING SOON) -->
+ 312	        <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 opacity-75 relative space-y-1.5">
+ 313	          <span class="absolute top-3 right-3 bg-slate-200 text-slate-600 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Coming Soon</span>
+ 314	          <div class="w-8 h-8 rounded-xl bg-indigo-500 text-white flex items-center justify-center font-bold mb-2">
+ 315	            <i data-lucide="bot" class="w-4 h-4"></i>
+ 316	          </div>
+ 317	          <h4 class="text-xs sm:text-sm font-bold text-slate-800">AI Auto-Reply Bot</h4>
+ 318	          <p class="text-[11px] text-slate-400 leading-tight">24/7 automated WhatsApp customer support & appointment booking.</p>
+ 319	        </div>
+ 320	
+ 321	        <!-- Product 3: Garage & Store CRM (COMING SOON) -->
+ 322	        <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 opacity-75 relative space-y-1.5">
+ 323	          <span class="absolute top-3 right-3 bg-slate-200 text-slate-600 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Coming Soon</span>
+ 324	          <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold mb-2">
+ 325	            <i data-lucide="users" class="w-4 h-4"></i>
+ 326	          </div>
+ 327	          <h4 class="text-xs sm:text-sm font-bold text-slate-800">Customer CRM & Billing</h4>
+ 328	          <p class="text-[11px] text-slate-400 leading-tight">Digital job cards, invoices, vehicle history & payment links.</p>
+ 329	        </div>
+ 330	
+ 331	        <!-- Product 4: Inventory & Stock Alert (COMING SOON) -->
+ 332	        <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 opacity-75 relative space-y-1.5">
+ 333	          <span class="absolute top-3 right-3 bg-slate-200 text-slate-600 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Coming Soon</span>
+ 334	          <div class="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center font-bold mb-2">
+ 335	            <i data-lucide="package" class="w-4 h-4"></i>
+ 336	          </div>
+ 337	          <h4 class="text-xs sm:text-sm font-bold text-slate-800">Stock & Inventory Alerts</h4>
+ 338	          <p class="text-[11px] text-slate-400 leading-tight">Low stock reminders and supplier order automation via WhatsApp.</p>
+ 339	        </div>
+ 340	      </div>
+ 341	    </div>
+ 342	  </div>
+ 343	
+ 344	  <!-- ================= ADMIN PORTAL MODAL / VIEW ================= -->
+ 345	  <div id="adminModal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+ 346	    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 max-h-[90vh] flex flex-col">
+ 347	      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+ 348	        <div class="flex items-center space-x-2.5">
+ 349	          <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
+ 350	            <i data-lucide="shield-check" class="w-4 h-4"></i>
+ 351	          </div>
+ 352	          <div>
+ 353	            <h3 class="text-base font-bold text-slate-900">Customer Management Portal</h3>
+ 354	            <p class="text-xs text-slate-400">View and manage registered businesses</p>
+ 355	          </div>
+ 356	        </div>
+ 357	        <button id="closeAdminModalBtn" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition">
+ 358	          <i data-lucide="x" class="w-5 h-5"></i>
+ 359	        </button>
+ 360	      </div>
+ 361	
+ 362	      <!-- Customer List Table -->
+ 363	      <div class="flex-1 overflow-y-auto space-y-3" id="adminCustomerList">
+ 364	        <div class="text-center py-8 text-xs text-slate-400">Loading customers...</div>
+ 365	      </div>
+ 366	    </div>
+ 367	  </div>
+ 368	
+ 369	  <!-- JavaScript Client Logic -->
+ 370	  <script>
+ 371	    lucide.createIcons();
+ 372	
+ 373	    // Tab Switching
+ 374	    const tabLogin = document.getElementById('tabLogin');
+ 375	    const tabRegister = document.getElementById('tabRegister');
+ 376	    const loginForm = document.getElementById('loginForm');
+ 377	    const registerForm = document.getElementById('registerForm');
+ 378	
+ 379	    tabLogin.addEventListener('click', () => {
+ 380	      tabLogin.className = 'flex-1 pb-3 text-emerald-600 border-b-2 border-emerald-600 text-center font-semibold';
+ 381	      tabRegister.className = 'flex-1 pb-3 text-slate-400 hover:text-slate-600 text-center';
+ 382	      loginForm.classList.remove('hidden');
+ 383	      registerForm.classList.add('hidden');
+ 384	    });
+ 385	
+ 386	    tabRegister.addEventListener('click', () => {
+ 387	      tabRegister.className = 'flex-1 pb-3 text-emerald-600 border-b-2 border-emerald-600 text-center font-semibold';
+ 388	      tabLogin.className = 'flex-1 pb-3 text-slate-400 hover:text-slate-600 text-center';
+ 389	      registerForm.classList.remove('hidden');
+ 390	      loginForm.classList.add('hidden');
+ 391	    });
+ 392	
+ 393	    // Handle Registration
+ 394	    registerForm.addEventListener('submit', async (e) => {
+ 395	      e.preventDefault();
+ 396	      const payload = {
+ 397	        businessName: document.getElementById('regBusinessName').value.trim(),
+ 398	        email: document.getElementById('regEmail').value.trim(),
+ 399	        password: document.getElementById('regPassword').value,
+ 400	        phoneNumberId: document.getElementById('regPhoneId').value.trim(),
+ 401	        accessToken: document.getElementById('regToken').value.trim(),
+ 402	      };
+ 403	
+ 404	      try {
+ 405	        const res = await fetch('/api/auth/register', {
+ 406	          method: 'POST',
+ 407	          headers: { 'Content-Type': 'application/json' },
+ 408	          body: JSON.stringify(payload),
+ 409	        });
+ 410	        const data = await res.json();
+ 411	        if (res.ok) {
+ 412	          localStorage.setItem('grambi_token', data.token);
+ 413	          showDashboard(data.user);
+ 414	        } else {
+ 415	          // Extract specific error message
+ 416	          let errMsg = 'Registration failed';
+ 417	          if (typeof data.error === 'string') {
+ 418	            errMsg = data.error;
+ 419	          } else if (data.error && typeof data.error === 'object') {
+ 420	            const keys = Object.keys(data.error);
+ 421	            if (keys.length > 0 && data.error[keys[0]]?._errors) {
+ 422	              errMsg = `${keys[0]}: ${data.error[keys[0]]._errors.join(', ')}`;
+ 423	            }
+ 424	          }
+ 425	          showAuthAlert(errMsg, 'error');
+ 426	        }
+ 427	      } catch (err) {
+ 428	        showAuthAlert('Network error: ' + (err.message || 'Cannot reach server'), 'error');
+ 429	      }
+ 430	    });
+ 431	
+ 432	    // Handle Login
+ 433	    loginForm.addEventListener('submit', async (e) => {
+ 434	      e.preventDefault();
+ 435	      const payload = {
+ 436	        email: document.getElementById('loginEmail').value,
+ 437	        password: document.getElementById('loginPassword').value,
+ 438	      };
+ 439	
+ 440	      try {
+ 441	        const res = await fetch('/api/auth/login', {
+ 442	          method: 'POST',
+ 443	          headers: { 'Content-Type': 'application/json' },
+ 444	          body: JSON.stringify(payload),
+ 445	        });
+ 446	        const data = await res.json();
+ 447	        if (res.ok) {
+ 448	          localStorage.setItem('grambi_token', data.token);
+ 449	          showDashboard(data.user);
+ 450	        } else {
+ 451	          showAuthAlert(data.error || 'Invalid credentials', 'error');
+ 452	        }
+ 453	      } catch (err) {
+ 454	        showAuthAlert('Network error during login', 'error');
+ 455	      }
+ 456	    });
+ 457	
+ 458	    // Logout
+ 459	    document.getElementById('logoutBtn').addEventListener('click', () => {
+ 460	      localStorage.removeItem('grambi_token');
+ 461	      document.getElementById('dashboardView').classList.add('hidden');
+ 462	      document.getElementById('authView').classList.remove('hidden');
+ 463	    });
+ 464	
+ 465	    // Show Dashboard
+ 466	    function showDashboard(user) {
+ 467	      document.getElementById('authView').classList.add('hidden');
+ 468	      document.getElementById('dashboardView').classList.remove('hidden');
+ 469	      document.getElementById('headerBusinessName').textContent = user.businessName || 'Business Portal';
+ 470	      
+ 471	      // Show Admin Portal Button if user is ADMIN
+ 472	      const adminBtn = document.getElementById('adminPortalBtn');
+ 473	      if (user.role === 'ADMIN') {
+ 474	        adminBtn.classList.remove('hidden');
+ 475	      } else {
+ 476	        adminBtn.classList.add('hidden');
+ 477	      }
+ 478	      
+ 479	      // Clear any previous alert banners on fresh login
+ 480	      const alertBox = document.getElementById('broadcastAlert');
+ 481	      alertBox.classList.add('hidden');
+ 482	      alertBox.textContent = '';
+ 483	      
+ 484	      loadCampaigns();
+ 485	      fetchMetaTemplates(); // Dynamically fetch Meta templates
+ 486	    }
+ 487	
+ 488	    // Admin Portal Logic
+ 489	    const adminModal = document.getElementById('adminModal');
+ 490	    const adminPortalBtn = document.getElementById('adminPortalBtn');
+ 491	    const closeAdminModalBtn = document.getElementById('closeAdminModalBtn');
+ 492	
+ 493	    adminPortalBtn.addEventListener('click', () => {
+ 494	      adminModal.classList.remove('hidden');
+ 495	      loadAdminCustomers();
+ 496	    });
+ 497	
+ 498	    closeAdminModalBtn.addEventListener('click', () => {
+ 499	      adminModal.classList.add('hidden');
+ 500	    });
+ 501	
+ 502	    async function loadAdminCustomers() {
+ 503	      const token = localStorage.getItem('grambi_token');
+ 504	      const listContainer = document.getElementById('adminCustomerList');
+ 505	      listContainer.innerHTML = '<div class="text-center py-8 text-xs text-slate-400">Loading customers...</div>';
+ 506	
+ 507	      try {
+ 508	        const res = await fetch('/api/admin/customers', {
+ 509	          headers: { 'Authorization': `Bearer ${token}` }
+ 510	        });
+ 511	        if (handleUnauthorized(res)) return;
+ 512	
+ 513	        const data = await res.json();
+ 514	        const customers = data.customers || [];
+ 515	
+ 516	        if (customers.length === 0) {
+ 517	          listContainer.innerHTML = '<div class="text-center py-8 text-xs text-slate-400">No customers registered yet.</div>';
+ 518	          return;
+ 519	        }
+ 520	
+ 521	        listContainer.innerHTML = customers.map(c => `
+ 522	          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3 hover:border-slate-300 transition">
+ 523	            <div class="min-w-0">
+ 524	              <div class="flex items-center space-x-2">
+ 525	                <span class="text-xs sm:text-sm font-bold text-slate-900 truncate">${c.businessName}</span>
+ 526	                ${c.role === 'ADMIN' ? '<span class="bg-indigo-100 text-indigo-700 text-[9px] font-bold px-2 py-0.5 rounded-md">ADMIN</span>' : ''}
+ 527	              </div>
+ 528	              <p class="text-[11px] text-slate-500 truncate mt-0.5">${c.email}</p>
+ 529	              <div class="flex items-center space-x-3 text-[10px] text-slate-400 font-mono mt-1">
+ 530	                <span>Phone ID: ${c.phoneNumberId || 'Not set'}</span>
+ 531	                <span>• ${c._count?.campaigns || 0} Campaigns</span>
+ 532	              </div>
+ 533	            </div>
+ 534	            ${c.role !== 'ADMIN' ? `
+ 535	              <button onclick="deleteCustomerAccount('${c.id}', '${c.businessName.replace(/'/g, "\\'")}')" 
+ 536	                      class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-xl border border-rose-200 transition shrink-0 flex items-center space-x-1">
+ 537	                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+ 538	                <span class="hidden sm:inline">Delete</span>
+ 539	              </button>
+ 540	            ` : ''}
+ 541	          </div>
+ 542	        `).join('');
+ 543	        lucide.createIcons();
+ 544	      } catch (err) {
+ 545	        listContainer.innerHTML = '<div class="text-center py-4 text-xs text-rose-500">Failed to load customer list.</div>';
+ 546	      }
+ 547	    }
+ 548	
+ 549	    async function deleteCustomerAccount(id, name) {
+ 550	      if (!confirm(`Are you sure you want to delete "${name}"? This will permanently erase all their campaigns and credentials.`)) {
+ 551	        return;
+ 552	      }
+ 553	
+ 554	      const token = localStorage.getItem('grambi_token');
+ 555	      try {
+ 556	        const res = await fetch(`/api/admin/customers/${id}`, {
+ 557	          method: 'DELETE',
+ 558	          headers: { 'Authorization': `Bearer ${token}` }
+ 559	        });
+ 560	
+ 561	        if (res.ok) {
+ 562	          loadAdminCustomers();
+ 563	          showBroadcastAlert(`Customer "${name}" deleted successfully.`, 'success');
+ 564	        } else {
+ 565	          const data = await res.json();
+ 566	          alert(data.error || 'Failed to delete customer');
+ 567	        }
+ 568	      } catch (err) {
+ 569	        alert('Error deleting customer account.');
+ 570	      }
+ 571	    }
+ 572	
+ 573	    // Export Campaign Delivery Report as CSV
+ 574	    async function downloadCampaignReport(id, name) {
+ 575	      const token = localStorage.getItem('grambi_token');
+ 576	      try {
+ 577	        const res = await fetch(`/api/campaigns/${id}/export`, {
+ 578	          headers: { 'Authorization': `Bearer ${token}` }
+ 579	        });
+ 580	        if (handleUnauthorized(res)) return;
+ 581	
+ 582	        if (res.ok) {
+ 583	          const csvText = await res.text();
+ 584	          const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
+ 585	          const url = window.URL.createObjectURL(blob);
+ 586	          const a = document.createElement('a');
+ 587	          a.style.display = 'none';
+ 588	          a.href = url;
+ 589	          a.setAttribute('download', `${name.replace(/[^a-zA-Z0-9]/g, '_')}_report.csv`);
+ 590	          document.body.appendChild(a);
+ 591	          a.click();
+ 592	          setTimeout(() => {
+ 593	            document.body.removeChild(a);
+ 594	            window.URL.revokeObjectURL(url);
+ 595	          }, 200);
+ 596	        } else {
+ 597	          showBroadcastAlert('Failed to download report.', 'error');
+ 598	        }
+ 599	      } catch (err) {
+ 600	        showBroadcastAlert('Error exporting CSV report: ' + err.message, 'error');
+ 601	      }
+ 602	    }
+ 603	
+ 604	    // Dynamically Fetch Live Templates from Meta API
+ 605	    async function fetchMetaTemplates() {
+ 606	      const token = localStorage.getItem('grambi_token');
+ 607	      if (!token) return;
+ 608	
+ 609	      const select = document.getElementById('customTemplateName');
+ 610	      try {
+ 611	        const res = await fetch('/api/templates', {
+ 612	          headers: { 'Authorization': `Bearer ${token}` }
+ 613	        });
+ 614	        
+ 615	        if (handleUnauthorized(res)) return;
+ 616	
+ 617	        const data = await res.json();
+ 618	        const templates = data.templates || [];
+ 619	
+ 620	        if (templates.length > 0) {
+ 621	          select.innerHTML = templates.map(t => {
+ 622	            const isApproved = t.status === 'APPROVED';
+ 623	            const statusIcon = isApproved ? '🟢' : t.status === 'IN_REVIEW' ? '🟡' : '🔴';
+ 624	            const disabledAttr = !isApproved && t.name !== 'hello_world' ? 'disabled' : '';
+ 625	            return `<option value="${t.name}" ${disabledAttr}>${statusIcon} ${t.name} (${t.status})</option>`;
+ 626	          }).join('');
+ 627	        }
+ 628	      } catch (err) {
+ 629	        console.error('Failed to sync templates dynamically', err);
+ 630	      }
+ 631	    }
+ 632	
+ 633	    // Template Preview Updates Dynamically
+ 634	    const customTemplateSelect = document.getElementById('customTemplateName');
+ 635	    const previewTextEl = document.getElementById('previewMessageText');
+ 636	
+ 637	    const TEMPLATE_PREVIEWS = {
+ 638	      'hello_world': 'Hello World! Welcome and congratulations on receiving this message from WhatsApp Business Platform.',
+ 639	      'order_update': 'Hello! Your account status update has been processed successfully. Thank you for choosing our service.',
+ 640	      'general_announcement': 'Hello! We have an important update regarding your account and services with us. Please feel free to reach out to our support team if you have any questions. Thank you for choosing us!',
+ 641	      'my_test_message': 'Hello, this is a test bulk message from our official WhatsApp service!'
+ 642	    };
+ 643	
+ 644	    customTemplateSelect.addEventListener('change', (e) => {
+ 645	      const selected = e.target.value;
+ 646	      previewTextEl.textContent = TEMPLATE_PREVIEWS[selected] || `[Template: ${selected}] This message template will be formatted and delivered to your customers' WhatsApp.`;
+ 647	    });
+ 648	
+ 649	    // Clean Duplicates & Format Numbers Helper
+ 650	    document.getElementById('cleanDuplicatesBtn').addEventListener('click', () => {
+ 651	      const raw = document.getElementById('recipientList').value;
+ 652	      const parsed = parseNumbers(raw);
+ 653	      const unique = [...new Set(parsed)];
+ 654	      document.getElementById('recipientList').value = unique.join('\n');
+ 655	      document.getElementById('recipientCount').textContent = `${unique.length} numbers`;
+ 656	      showBroadcastAlert(`✨ Cleaned numbers list! Removed ${parsed.length - unique.length} duplicates. Total: ${unique.length}`, 'info');
+ 657	    });
+ 658	
+ 659	    document.getElementById('clearNumbersBtn').addEventListener('click', () => {
+ 660	      document.getElementById('recipientList').value = '';
+ 661	      document.getElementById('recipientCount').textContent = '0 numbers';
+ 662	    });
+ 663	
+ 664	    // CSV File Upload Parser
+ 665	    const uploadCsvBtn = document.getElementById('uploadCsvBtn');
+ 666	    const csvFileInput = document.getElementById('csvFileInput');
+ 667	
+ 668	    uploadCsvBtn.addEventListener('click', () => csvFileInput.click());
+ 669	
+ 670	    csvFileInput.addEventListener('change', (e) => {
+ 671	      const file = e.target.files[0];
+ 672	      if (!file) return;
+ 673	
+ 674	      const reader = new FileReader();
+ 675	      reader.onload = (event) => {
+ 676	        const text = event.target.result;
+ 677	        const parsed = parseNumbers(text);
+ 678	        if (parsed.length > 0) {
+ 679	          const textarea = document.getElementById('recipientList');
+ 680	          textarea.value = parsed.join('\n');
+ 681	          document.getElementById('recipientCount').textContent = `${parsed.length} numbers`;
+ 682	          showBroadcastAlert(`📁 Imported ${parsed.length} phone numbers from ${file.name}!`, 'success');
+ 683	        } else {
+ 684	          showBroadcastAlert('No valid 10+ digit phone numbers found in file.', 'error');
+ 685	        }
+ 686	        csvFileInput.value = '';
+ 687	      };
+ 688	      reader.readAsText(file);
+ 689	    });
+ 690	
+ 691	    // Number parser
+ 692	    document.getElementById('recipientList').addEventListener('input', (e) => {
+ 693	      const numbers = parseNumbers(e.target.value);
+ 694	      const count = numbers.length;
+ 695	      document.getElementById('recipientCount').textContent = `${count} numbers`;
+ 696	    });
+ 697	
+ 698	    function parseNumbers(raw) {
+ 699	      return raw.split(/[\n,]+/).map(n => n.replace(/[^0-9]/g, '')).filter(n => n.length >= 10);
+ 700	    }
+ 701	
+ 702	    // Launch Broadcast
+ 703	    document.getElementById('launchBtn').addEventListener('click', async () => {
+ 704	      const token = localStorage.getItem('grambi_token');
+ 705	      const campaignName = document.getElementById('campaignName').value.trim();
+ 706	      const templateName = document.getElementById('customTemplateName').value.trim() || 'hello_world';
+ 707	      const numbers = parseNumbers(document.getElementById('recipientList').value);
+ 708	
+ 709	      if (!campaignName || numbers.length === 0) {
+ 710	        showBroadcastAlert('Please provide a campaign title and at least 1 phone number.', 'error');
+ 711	        return;
+ 712	      }
+ 713	
+ 714	      const payload = {
+ 715	        campaignName,
+ 716	        templateName,
+ 717	        languageCode: 'en_US',
+ 718	        recipients: numbers.map(phoneNumber => ({ phoneNumber }))
+ 719	      };
+ 720	
+ 721	      try {
+ 722	        const res = await fetch('/api/messages/bulk', {
+ 723	          method: 'POST',
+ 724	          headers: {
+ 725	            'Content-Type': 'application/json',
+ 726	            'Authorization': `Bearer ${token}`,
+ 727	          },
+ 728	          body: JSON.stringify(payload),
+ 729	        });
+ 730	
+ 731	        if (handleUnauthorized(res)) return;
+ 732	
+ 733	        const data = await res.json();
+ 734	        if (res.ok) {
+ 735	          showBroadcastAlert(`🚀 Broadcast queued (${data.totalQueued} recipient${data.totalQueued > 1 ? 's' : ''}) — dispatching now...`, 'info');
+ 736	          document.getElementById('recipientList').value = '';
+ 737	          document.getElementById('recipientCount').textContent = '0 numbers';
+ 738	          
+ 739	          // Automatically hide the "dispatching" banner after 4 seconds
+ 740	          setTimeout(() => {
+ 741	            const el = document.getElementById('broadcastAlert');
+ 742	            if (el) el.classList.add('hidden');
+ 743	          }, 4000);
+ 744	          
+ 745	          // Poll immediately after 1s, 2s, and 4s
+ 746	          setTimeout(loadCampaigns, 800);
+ 747	          setTimeout(loadCampaigns, 2000);
+ 748	          setTimeout(loadCampaigns, 4000);
+ 749	        } else {
+ 750	          showBroadcastAlert(data.error || 'Failed to dispatch broadcast', 'error');
+ 751	        }
+ 752	      } catch (e) {
+ 753	        showBroadcastAlert('Network error occurred', 'error');
+ 754	      }
+ 755	    });
+ 756	
+ 757	    // Instant Sandbox Test (No Template Review Needed)
+ 758	    document.getElementById('sandboxTestBtn').addEventListener('click', async () => {
+ 759	      const token = localStorage.getItem('grambi_token');
+ 760	      const numbers = parseNumbers(document.getElementById('recipientList').value);
+ 761	
+ 762	      if (numbers.length === 0) {
+ 763	        showBroadcastAlert('Please paste at least 1 verified test phone number.', 'error');
+ 764	        return;
+ 765	      }
+ 766	
+ 767	      try {
+ 768	        const res = await fetch('/api/messages/sandbox-test', {
+ 769	          method: 'POST',
+ 770	          headers: {
+ 771	            'Content-Type': 'application/json',
+ 772	            'Authorization': `Bearer ${token}`,
+ 773	          },
+ 774	          body: JSON.stringify({ recipientNumber: numbers[0] }),
+ 775	        });
+ 776	
+ 777	        const data = await res.json();
+ 778	        if (res.ok) {
+ 779	          showBroadcastAlert(`⚡ Instant test message sent successfully to ${numbers[0]}!`, 'success');
+ 780	        } else {
+ 781	          showBroadcastAlert(data.error || 'Failed to send sandbox test', 'error');
+ 782	        }
+ 783	      } catch (err) {
+ 784	        showBroadcastAlert('Network error during sandbox test', 'error');
+ 785	      }
+ 786	    });
+ 787	
+ 788	    // Load Campaigns with Modern Visual Analytics Cards & Progress Bars
+ 789	    async function loadCampaigns() {
+ 790	      const token = localStorage.getItem('grambi_token');
+ 791	      if (!token) return;
+ 792	
+ 793	      const container = document.getElementById('campaignsContainer');
+ 794	      try {
+ 795	        const res = await fetch('/api/campaigns', {
+ 796	          headers: { 'Authorization': `Bearer ${token}` }
+ 797	        });
+ 798	        
+ 799	        if (handleUnauthorized(res)) return;
+ 800	
+ 801	        const campaigns = await res.json();
+ 802	
+ 803	        if (campaigns.length === 0) {
+ 804	          container.innerHTML = `
+ 805	            <div class="text-center py-10 px-4">
+ 806	              <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-3">
+ 807	                <i data-lucide="inbox" class="w-6 h-6"></i>
+ 808	              </div>
+ 809	              <p class="text-xs font-semibold text-slate-700">No broadcasts launched yet</p>
+ 810	              <p class="text-[11px] text-slate-400 mt-1">Your sent campaigns and live delivery progress will show here.</p>
+ 811	            </div>
+ 812	          `;
+ 813	          lucide.createIcons();
+ 814	          return;
+ 815	        }
+ 816	
+ 817	        container.innerHTML = campaigns.map(c => {
+ 818	          const sent = c.summary.SENT || 0;
+ 819	          const delivered = c.summary.DELIVERED || 0;
+ 820	          const read = c.summary.READ || 0;
+ 821	          const failed = c.summary.FAILED || 0;
+ 822	          const pending = c.summary.PENDING || 0;
+ 823	          const total = c.total || (sent + delivered + read + failed + pending) || 1;
+ 824	
+ 825	          // Compute success percentage
+ 826	          const successCount = sent + delivered + read;
+ 827	          const percent = Math.min(100, Math.round((successCount / total) * 100));
+ 828	
+ 829	          // Format readable date
+ 830	          const dateObj = new Date(c.createdAt);
+ 831	          const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+ 832	          const dateStr = dateObj.toLocaleDateString([], { month: 'short', day: 'numeric' });
+ 833	
+ 834	          const isCompleted = pending === 0;
+ 835	          const statusBadge = isCompleted
+ 836	            ? (failed > 0 && successCount === 0 
+ 837	                ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200">Failed</span>'
+ 838	                : '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Completed</span>')
+ 839	            : '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse">Broadcasting...</span>';
+ 840	
+ 841	          return `
+ 842	            <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 hover:border-slate-300 shadow-xs transition-all space-y-3.5">
+ 843	              
+ 844	              <!-- Card Header -->
+ 845	              <div class="flex items-start justify-between gap-2">
+ 846	                <div class="min-w-0">
+ 847	                  <h3 class="text-xs sm:text-sm font-bold text-slate-900 truncate leading-tight">${c.name}</h3>
+ 848	                  <div class="flex items-center space-x-2 mt-1">
+ 849	                    <span class="text-[10px] font-mono font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 truncate max-w-[120px] sm:max-w-xs">
+ 850	                      ${c.templateName}
+ 851	                    </span>
+ 852	                    <span class="text-[10px] text-slate-400 font-medium">${dateStr}, ${timeStr}</span>
+ 853	                  </div>
+ 854	                </div>
+ 855	                <div class="flex items-center space-x-1.5 shrink-0">
+ 856	                  <button onclick="downloadCampaignReport('${c.id}', '${c.name.replace(/'/g, "\\'")}')" 
+ 857	                          class="p-1 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition" 
+ 858	                          title="Export CSV Report">
+ 859	                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+ 860	                  </button>
+ 861	                  ${statusBadge}
+ 862	                </div>
+ 863	              </div>
+ 864	
+ 865	              <!-- Visual Progress Bar -->
+ 866	              <div class="space-y-1">
+ 867	                <div class="flex items-center justify-between text-[11px] font-semibold text-slate-600">
+ 868	                  <span>Delivery Success</span>
+ 869	                  <span class="${percent === 100 ? 'text-emerald-600' : 'text-slate-800'} font-bold">${percent}%</span>
+ 870	                </div>
+ 871	                <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden flex">
+ 872	                  <div class="bg-emerald-500 h-full transition-all duration-500" style="width: ${percent}%"></div>
+ 873	                  ${failed > 0 ? `<div class="bg-rose-500 h-full" style="width: ${Math.round((failed / total) * 100)}%"></div>` : ''}
+ 874	                </div>
+ 875	              </div>
+ 876	
+ 877	              <!-- Stat Badges Grid -->
+ 878	              <div class="grid grid-cols-4 gap-1.5 pt-1 text-center">
+ 879	                <div class="bg-slate-50 border border-slate-100 rounded-xl py-1.5 px-1">
+ 880	                  <div class="text-[9px] font-semibold text-slate-400 uppercase">Total</div>
+ 881	                  <div class="text-xs font-bold text-slate-800">${total}</div>
+ 882	                </div>
+ 883	                <div class="bg-blue-50/60 border border-blue-100 rounded-xl py-1.5 px-1">
+ 884	                  <div class="text-[9px] font-semibold text-blue-500 uppercase">Sent</div>
+ 885	                  <div class="text-xs font-bold text-blue-700">${sent}</div>
+ 886	                </div>
+ 887	                <div class="bg-emerald-50/60 border border-emerald-100 rounded-xl py-1.5 px-1">
+ 888	                  <div class="text-[9px] font-semibold text-emerald-600 uppercase">Delivered</div>
+ 889	                  <div class="text-xs font-bold text-emerald-700">${delivered}</div>
+ 890	                </div>
+ 891	                <div class="${failed > 0 ? 'bg-rose-50/80 border-rose-200' : 'bg-slate-50 border-slate-100'} border rounded-xl py-1.5 px-1">
+ 892	                  <div class="text-[9px] font-semibold ${failed > 0 ? 'text-rose-500' : 'text-slate-400'} uppercase">Failed</div>
+ 893	                  <div class="text-xs font-bold ${failed > 0 ? 'text-rose-700 font-extrabold' : 'text-slate-400'}">${failed}</div>
+ 894	                </div>
+ 895	              </div>
+ 896	
+ 897	              <!-- Detailed Error Message Display (If Failed) -->
+ 898	              ${c.failureReason ? `
+ 899	                <div class="bg-rose-50/90 border border-rose-200/80 rounded-xl p-2.5 flex items-start space-x-2 text-rose-800">
+ 900	                  <i data-lucide="alert-circle" class="w-4 h-4 text-rose-600 shrink-0 mt-0.5"></i>
+ 901	                  <div class="text-[11px] leading-tight font-medium">
+ 902	                    <span class="font-bold">Why it failed:</span> ${c.failureReason}
+ 903	                  </div>
+ 904	                </div>
+ 905	              ` : ''}
+ 906	
+ 907	            </div>
+ 908	          `;
+ 909	        }).join('');
+ 910	        lucide.createIcons();
+ 911	      } catch (err) {
+ 912	        console.error(err);
+ 913	      }
+ 914	    }
+ 915	
+ 916	    function showAuthAlert(msg, type) {
+ 917	      const el = document.getElementById('authAlert');
+ 918	      el.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-800', 'bg-rose-50', 'text-rose-800');
+ 919	      el.classList.add(type === 'success' ? 'bg-emerald-50' : 'bg-rose-50', type === 'success' ? 'text-emerald-800' : 'text-rose-800');
+ 920	      el.textContent = msg;
+ 921	    }
+ 922	
+ 923	    function showBroadcastAlert(msg, type) {
+ 924	      const el = document.getElementById('broadcastAlert');
+ 925	      el.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-800', 'bg-rose-50', 'text-rose-800', 'bg-blue-50', 'text-blue-800', 'border-blue-200');
+ 926	      if (type === 'success') {
+ 927	        el.classList.add('bg-emerald-50', 'text-emerald-800', 'border', 'border-emerald-200');
+ 928	      } else if (type === 'info') {
+ 929	        el.classList.add('bg-blue-50', 'text-blue-800', 'border', 'border-blue-200');
+ 930	      } else {
+ 931	        el.classList.add('bg-rose-50', 'text-rose-800', 'border', 'border-rose-200');
+ 932	      }
+ 933	      el.textContent = msg;
+ 934	    }
+ 935	
+ 936	    // Modal Logic for Updating Phone ID and Access Token
+ 937	    const settingsModal = document.getElementById('settingsModal');
+ 938	    const settingsToggleBtn = document.getElementById('settingsToggleBtn');
+ 939	    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+ 940	    const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
+ 941	    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+ 942	
+ 943	    settingsToggleBtn.addEventListener('click', async () => {
+ 944	      const token = localStorage.getItem('grambi_token');
+ 945	      try {
+ 946	        const res = await fetch('/api/auth/profile', {
+ 947	          headers: { 'Authorization': `Bearer ${token}` }
+ 948	        });
+ 949	        const user = await res.json();
+ 950	        document.getElementById('modalPhoneId').value = user.phoneNumberId || '';
+ 951	        document.getElementById('modalToken').value = '';
+ 952	        settingsModal.classList.remove('hidden');
+ 953	      } catch (e) {
+ 954	        console.error(e);
+ 955	      }
+ 956	    });
+ 957	
+ 958	    const closeModal = () => settingsModal.classList.add('hidden');
+ 959	    closeSettingsBtn.addEventListener('click', closeModal);
+ 960	    cancelSettingsBtn.addEventListener('click', closeModal);
+ 961	
+ 962	    saveSettingsBtn.addEventListener('click', async () => {
+ 963	      const token = localStorage.getItem('grambi_token');
+ 964	      const phoneNumberId = document.getElementById('modalPhoneId').value.trim();
+ 965	      const accessToken = document.getElementById('modalToken').value.trim();
+ 966	
+ 967	      try {
+ 968	        const res = await fetch('/api/auth/profile', {
+ 969	          method: 'PUT',
+ 970	          headers: {
+ 971	            'Content-Type': 'application/json',
+ 972	            'Authorization': `Bearer ${token}`,
+ 973	          },
+ 974	          body: JSON.stringify({ phoneNumberId, accessToken: accessToken || undefined }),
+ 975	        });
+ 976	
+ 977	        if (res.ok) {
+ 978	          showBroadcastAlert('✅ Meta credentials updated successfully!', 'success');
+ 979	          closeModal();
+ 980	        } else {
+ 981	          showBroadcastAlert('Failed to update credentials.', 'error');
+ 982	        }
+ 983	      } catch (err) {
+ 984	        showBroadcastAlert('Error updating credentials.', 'error');
+ 985	      }
+ 986	    });
+ 987	
+ 988	    // Check & Handle 401 Unauthorized Automatically Across All API Calls
+ 989	    function handleUnauthorized(res) {
+ 990	      if (res.status === 401) {
+ 991	        localStorage.removeItem('grambi_token');
+ 992	        document.getElementById('dashboardView').classList.add('hidden');
+ 993	        document.getElementById('authView').classList.remove('hidden');
+ 994	        showAuthAlert('Session expired or invalid. Please sign in again.', 'error');
+ 995	        return true;
+ 996	      }
+ 997	      return false;
+ 998	    }
+ 999	
+1000	    // Auto Login on startup if token exists
+1001	    window.addEventListener('load', async () => {
+1002	      const token = localStorage.getItem('grambi_token');
+1003	      if (token) {
+1004	        try {
+1005	          const res = await fetch('/api/auth/profile', {
+1006	            headers: { 'Authorization': `Bearer ${token}` }
+1007	          });
+1008	          if (res.ok) {
+1009	            const user = await res.json();
+1010	            showDashboard(user);
+1011	          } else {
+1012	            handleUnauthorized(res);
+1013	          }
+1014	        } catch (e) {
+1015	          localStorage.removeItem('grambi_token');
+1016	        }
+1017	      }
+1018	    });
+1019	
+1020	    document.getElementById('refreshReports').addEventListener('click', loadCampaigns);
+1021	    setInterval(loadCampaigns, 5000);
+1022	
+1023	    // Products Suite App Switcher Modal Logic
+1024	    window.toggleProductsSuite = function(show) {
+1025	      const modal = document.getElementById('productsModal');
+1026	      if (!modal) return;
+1027	      if (show) {
+1028	        modal.classList.remove('hidden');
+1029	      } else {
+1030	        modal.classList.add('hidden');
+1031	      }
+1032	    };
+1033	
+1034	    // ================= PWA REGISTRATION & INSTALLATION =================
+1035	    if ('serviceWorker' in navigator) {
+1036	      window.addEventListener('load', () => {
+1037	        navigator.serviceWorker.register('/sw.js').then((reg) => {
+1038	          console.log('✅ ServiceWorker registered with scope:', reg.scope);
+1039	        }).catch((err) => {
+1040	          console.error('ServiceWorker registration failed:', err);
+1041	        });
+1042	      });
+1043	    }
+1044	
+1045	    let deferredPrompt;
+1046	    const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+1047	
+1048	    window.addEventListener('beforeinstallprompt', (e) => {
+1049	      e.preventDefault();
+1050	      deferredPrompt = e;
+1051	      pwaInstallBtn.classList.remove('hidden');
+1052	    });
+1053	
+1054	    pwaInstallBtn.addEventListener('click', async () => {
+1055	      if (deferredPrompt) {
+1056	        deferredPrompt.prompt();
+1057	        const { outcome } = await deferredPrompt.userChoice;
+1058	        if (outcome === 'accepted') {
+1059	          pwaInstallBtn.classList.add('hidden');
+1060	        }
+1061	        deferredPrompt = null;
+1062	      } else {
+1063	        alert('To install on iPhone: tap the Share button in Safari (square with arrow pointing up) and select "Add to Home Screen".');
+1064	      }
+1065	    });
+1066	
+1067	    window.addEventListener('appinstalled', () => {
+1068	      pwaInstallBtn.classList.add('hidden');
+1069	      console.log('🎉 PWA successfully installed to home screen!');
+1070	    });
+1071	  </script>
+1072	</body>
+1073	</html>
