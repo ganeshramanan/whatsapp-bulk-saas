@@ -162,6 +162,11 @@ export const listCustomerCampaigns = async (req: AuthRequest, res: Response) => 
       },
       {} as Record<string, number>
     );
+
+    // Collect first failure reason to show on dashboard
+    const firstFailedMessage = c.messages.find(m => m.status === 'FAILED' && m.errorMessage);
+    const failureReason = firstFailedMessage ? firstFailedMessage.errorMessage : null;
+
     return {
       id: c.id,
       name: c.name,
@@ -170,6 +175,7 @@ export const listCustomerCampaigns = async (req: AuthRequest, res: Response) => 
       createdAt: c.createdAt,
       total: c.messages.length,
       summary,
+      failureReason,
     };
   });
 

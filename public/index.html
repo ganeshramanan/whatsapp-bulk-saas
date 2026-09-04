@@ -400,11 +400,11 @@
 
         const data = await res.json();
         if (res.ok) {
-          showBroadcastAlert(`🚀 Successfully launched broadcast to ${data.totalQueued} customers!`, 'success');
+          showBroadcastAlert(`🚀 Broadcast queued (${data.totalQueued} recipients) — dispatching now...`, 'info');
           document.getElementById('recipientList').value = '';
           document.getElementById('recipientCount').textContent = '0 numbers';
           
-          // Poll immediately after 1s, 2s, and 3s so status updates from "Queued" to "Sent" live
+          // Poll immediately after 1s, 2s, and 4s
           setTimeout(loadCampaigns, 800);
           setTimeout(loadCampaigns, 2000);
           setTimeout(loadCampaigns, 4000);
@@ -546,6 +546,16 @@
                 </div>
               </div>
 
+              <!-- Detailed Error Message Display (If Failed) -->
+              ${c.failureReason ? `
+                <div class="bg-rose-50/90 border border-rose-200/80 rounded-xl p-2.5 flex items-start space-x-2 text-rose-800">
+                  <i data-lucide="alert-circle" class="w-4 h-4 text-rose-600 shrink-0 mt-0.5"></i>
+                  <div class="text-[11px] leading-tight font-medium">
+                    <span class="font-bold">Why it failed:</span> ${c.failureReason}
+                  </div>
+                </div>
+              ` : ''}
+
             </div>
           `;
         }).join('');
@@ -564,8 +574,14 @@
 
     function showBroadcastAlert(msg, type) {
       const el = document.getElementById('broadcastAlert');
-      el.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-800', 'bg-rose-50', 'text-rose-800');
-      el.classList.add(type === 'success' ? 'bg-emerald-50' : 'bg-rose-50', type === 'success' ? 'text-emerald-800' : 'text-rose-800');
+      el.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-800', 'bg-rose-50', 'text-rose-800', 'bg-blue-50', 'text-blue-800', 'border-blue-200');
+      if (type === 'success') {
+        el.classList.add('bg-emerald-50', 'text-emerald-800', 'border', 'border-emerald-200');
+      } else if (type === 'info') {
+        el.classList.add('bg-blue-50', 'text-blue-800', 'border', 'border-blue-200');
+      } else {
+        el.classList.add('bg-rose-50', 'text-rose-800', 'border', 'border-rose-200');
+      }
       el.textContent = msg;
     }
 
