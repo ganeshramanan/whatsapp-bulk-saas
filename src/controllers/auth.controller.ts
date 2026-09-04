@@ -9,12 +9,12 @@ const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'grambi_super_secret_jwt_key_2026';
 
 const RegisterSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-  businessName: z.string().min(2),
-  phoneNumberId: z.string().min(5),
+  email: z.string().min(3),
+  password: z.string().min(1),
+  businessName: z.string().min(1),
+  phoneNumberId: z.string().min(1),
   wabaId: z.string().optional(),
-  accessToken: z.string().min(10),
+  accessToken: z.string().min(1),
 });
 
 const LoginSchema = z.object({
