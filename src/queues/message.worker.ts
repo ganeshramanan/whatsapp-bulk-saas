@@ -19,6 +19,7 @@ export interface JobData {
 export const messageWorker = new Worker<JobData>(
   'bulk-messages',
   async (job: Job<JobData>) => {
+    console.log(`[Worker] Processing job ${job.id} for phone ${job.data.phoneNumber} with template ${job.data.templateName}`);
     const { recordId, phoneNumberId, token, phoneNumber, templateName, languageCode, components } = job.data;
 
     try {
@@ -31,6 +32,7 @@ export const messageWorker = new Worker<JobData>(
         components,
       });
 
+      console.log(`[Worker] ✅ Message sent successfully! Result:`, result);
       const wamid = result.messages?.[0]?.id;
 
       await prisma.messageRecord.update({
@@ -45,6 +47,7 @@ export const messageWorker = new Worker<JobData>(
       return { status: 'SENT', wamid };
     } catch (error: any) {
       const errorMsg = error.response?.data?.error?.message || error.message;
+      console.error(`[Worker] ❌ Failed to send message to ${phoneNumber}:`, errorMsg);
 
       await prisma.messageRecord.update({
         where: { id: recordId },
