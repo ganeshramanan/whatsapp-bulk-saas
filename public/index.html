@@ -4,6 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Grambi | WhatsApp Broadcast SaaS</title>
+  
+  <!-- PWA Manifest & Meta Tags -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#059669" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Grambi Hub" />
+  
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -127,6 +136,13 @@
         </div>
 
         <div class="flex items-center space-x-2 sm:space-x-3">
+          <!-- PWA Install Button (Shown on mobile browsers) -->
+          <button id="pwaInstallBtn" class="hidden text-xs font-bold text-emerald-700 bg-emerald-100/70 border border-emerald-300 px-3 py-1.5 rounded-xl hover:bg-emerald-200 transition flex items-center space-x-1.5">
+            <i data-lucide="download-cloud" class="w-3.5 h-3.5 text-emerald-700"></i>
+            <span class="hidden sm:inline">Install App</span>
+            <span class="sm:hidden">Install</span>
+          </button>
+          
           <!-- Admin Portal Switcher (Visible only if user.role === 'ADMIN') -->
           <button id="adminPortalBtn" class="hidden text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-xl hover:bg-indigo-100 transition flex items-center space-x-1.5">
             <i data-lucide="shield-check" class="w-3.5 h-3.5 text-indigo-600"></i>
@@ -937,6 +953,44 @@
 
     document.getElementById('refreshReports').addEventListener('click', loadCampaigns);
     setInterval(loadCampaigns, 5000);
+
+    // ================= PWA REGISTRATION & INSTALLATION =================
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then((reg) => {
+          console.log('✅ ServiceWorker registered with scope:', reg.scope);
+        }).catch((err) => {
+          console.error('ServiceWorker registration failed:', err);
+        });
+      });
+    }
+
+    let deferredPrompt;
+    const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      pwaInstallBtn.classList.remove('hidden');
+    });
+
+    pwaInstallBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          pwaInstallBtn.classList.add('hidden');
+        }
+        deferredPrompt = null;
+      } else {
+        alert('To install on iPhone: tap the Share button in Safari (square with arrow pointing up) and select "Add to Home Screen".');
+      }
+    });
+
+    window.addEventListener('appinstalled', () => {
+      pwaInstallBtn.classList.add('hidden');
+      console.log('🎉 PWA successfully installed to home screen!');
+    });
   </script>
 </body>
 </html>
