@@ -2,22 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Grambi | WhatsApp Broadcast SaaS</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* Prevent iOS text zoom and improve touch targets */
+    input, select, textarea, button {
+      font-size: 16px !important;
+    }
+    @media (min-width: 640px) {
+      input, select, textarea, button {
+        font-size: 14px !important;
+      }
+    }
+    /* Smooth mobile scrolling */
+    body {
+      -webkit-overflow-scrolling: touch;
+    }
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased font-sans min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 antialiased font-sans min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
 
   <!-- ================= AUTH VIEW (Login / Register) ================= -->
-  <div id="authView" class="flex-1 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-lg border border-slate-200">
+  <div id="authView" class="flex-1 flex items-center justify-center p-4 sm:p-6">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-xl border border-slate-100">
       
       <!-- Brand Header -->
       <div class="text-center mb-6">
-        <div class="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mx-auto shadow-sm">
+        <div class="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mx-auto shadow-md shadow-emerald-600/20">
           G
         </div>
         <h1 class="text-xl font-bold text-slate-900 mt-3">Welcome to Grambi</h1>
@@ -26,10 +41,10 @@
 
       <!-- Tabs: Sign In / Register -->
       <div class="flex border-b border-slate-200 mb-6 text-sm font-medium">
-        <button id="tabLogin" class="flex-1 pb-3 text-emerald-600 border-b-2 border-emerald-600 text-center">
+        <button id="tabLogin" class="flex-1 pb-3 text-emerald-600 border-b-2 border-emerald-600 text-center font-semibold transition">
           Sign In
         </button>
-        <button id="tabRegister" class="flex-1 pb-3 text-slate-400 hover:text-slate-600 text-center">
+        <button id="tabRegister" class="flex-1 pb-3 text-slate-400 hover:text-slate-600 text-center transition">
           Register Customer
         </button>
       </div>
@@ -37,198 +52,162 @@
       <!-- Login Form -->
       <form id="loginForm" class="space-y-4">
         <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">Business Email</label>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5">Business Email</label>
           <input id="loginEmail" type="email" required placeholder="name@company.com"
-                 class="w-full text-sm px-3.5 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+                 class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition" />
         </div>
         <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">Password</label>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5">Password</label>
           <input id="loginPassword" type="password" required placeholder="••••••••"
-                 class="w-full text-sm px-3.5 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+                 class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition" />
         </div>
-        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl shadow-sm text-sm transition">
-          Sign In to Dashboard
+        <button type="submit" class="w-full bg-emerald-600 active:bg-emerald-700 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-emerald-600/25 transition flex items-center justify-center space-x-2">
+          <span>Sign In to Dashboard</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
       </form>
 
       <!-- Register Form (Collects Meta IDs One Time) -->
-      <form id="registerForm" class="space-y-3 hidden">
+      <form id="registerForm" class="space-y-3.5 hidden">
         <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">Business Name</label>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Business Name</label>
           <input id="regBusinessName" type="text" required placeholder="e.g. Apex Hospital / City Clinic"
-                 class="w-full text-sm px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+                 class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition" />
         </div>
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">Email</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Email</label>
             <input id="regEmail" type="email" required placeholder="admin@store.com"
-                   class="w-full text-sm px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+                   class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition" />
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">Password</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
             <input id="regPassword" type="password" required placeholder="••••••••"
-                   class="w-full text-sm px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+                   class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition" />
           </div>
         </div>
 
-        <div class="pt-2 border-t border-slate-100">
-          <p class="text-[11px] font-semibold text-slate-800 mb-2">WhatsApp Meta Credentials (One-time Setup)</p>
-          <div class="space-y-2">
-            <div>
-              <label class="block text-[11px] text-slate-600 mb-0.5">Phone Number ID</label>
-              <input id="regPhoneId" type="text" required placeholder="1269930609537457"
-                     class="w-full text-xs px-3 py-1.5 border border-slate-200 rounded-lg font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
-            </div>
-            <div>
-              <label class="block text-[11px] text-slate-600 mb-0.5">Permanent Access Token</label>
-              <input id="regToken" type="password" required placeholder="EAAG..."
-                     class="w-full text-xs px-3 py-1.5 border border-slate-200 rounded-lg font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
-            </div>
+        <div class="pt-3 border-t border-slate-100 space-y-2.5">
+          <p class="text-[11px] font-bold text-slate-800 uppercase tracking-wider">WhatsApp Meta Setup (One-Time)</p>
+          <div>
+            <label class="block text-[11px] font-medium text-slate-600 mb-1">Phone Number ID</label>
+            <input id="regPhoneId" type="text" required placeholder="1269930609537457 or Test ID"
+                   class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-medium text-slate-600 mb-1">Permanent Access Token</label>
+            <input id="regToken" type="password" required placeholder="EAAG..."
+                   class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition" />
           </div>
         </div>
 
-        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl shadow-sm text-sm transition mt-2">
+        <button type="submit" class="w-full bg-emerald-600 active:bg-emerald-700 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-emerald-600/25 transition mt-2">
           Create Account & Connect
         </button>
       </form>
 
-      <div id="authAlert" class="hidden mt-4 p-3 rounded-xl text-xs font-medium"></div>
+      <div id="authAlert" class="hidden mt-4 p-3.5 rounded-2xl text-xs font-medium"></div>
     </div>
   </div>
 
-  <!-- ================= DASHBOARD VIEW (Clean, Simple, Zero Technical Jargon) ================= -->
+  <!-- ================= DASHBOARD VIEW (100% Mobile & Touch Friendly) ================= -->
   <div id="dashboardView" class="hidden flex-1 flex flex-col">
     
     <!-- Top Bar -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-          <div class="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-sm sm:text-base shadow-sm">
             G
           </div>
-          <div>
-            <h1 class="text-sm font-bold text-slate-900 leading-tight" id="headerBusinessName">My Business</h1>
-            <p class="text-[11px] text-slate-400">WhatsApp Marketing Portal</p>
+          <div class="truncate max-w-[150px] sm:max-w-xs">
+            <h1 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight truncate" id="headerBusinessName">My Business</h1>
+            <p class="text-[10px] text-slate-400">Broadcaster</p>
           </div>
         </div>
 
-        <div class="flex items-center space-x-4">
-          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
-            WhatsApp Sender Active
+        <div class="flex items-center space-x-2 sm:space-x-4">
+          <span class="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+            Active
           </span>
-          <button id="logoutBtn" class="text-xs font-medium text-slate-500 hover:text-rose-600 flex items-center space-x-1 transition">
-            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-            <span>Logout</span>
+          <button id="logoutBtn" class="p-2 sm:px-3 sm:py-1.5 text-xs font-medium text-slate-500 hover:text-rose-600 rounded-lg hover:bg-rose-50 flex items-center space-x-1 transition">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Logout</span>
           </button>
         </div>
       </div>
     </header>
 
-    <!-- Modal: Update Meta Settings -->
-    <div id="settingsModal" class="hidden fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
-      <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-          <div class="flex items-center space-x-2">
-            <i data-lucide="settings" class="w-5 h-5 text-emerald-600"></i>
-            <h3 class="text-base font-semibold text-slate-900">Update WhatsApp Settings</h3>
-          </div>
-          <button id="closeSettingsBtn" class="text-slate-400 hover:text-slate-600">
-            <i data-lucide="x" class="w-5 h-5"></i>
-          </button>
-        </div>
-
-        <div class="space-y-3">
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">Phone Number ID</label>
-            <input id="modalPhoneId" type="text" placeholder="1269930609537457 or Test ID"
-                   class="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">Access Token</label>
-            <input id="modalToken" type="password" placeholder="EAAG..."
-                   class="w-full text-xs px-3 py-2 border border-slate-200 rounded-lg font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
-          </div>
-        </div>
-
-        <div class="flex justify-end space-x-2 pt-2">
-          <button id="cancelSettingsBtn" class="px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
-          <button id="saveSettingsBtn" class="px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm">Save Changes</button>
-        </div>
-      </div>
-    </div>
-
     <!-- Main Content Area -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 w-full">
       
-      <!-- Broadcast Sender Box (7 cols) -->
-      <div class="lg:col-span-7 space-y-6">
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-5">
+      <!-- Broadcast Sender Box (7 cols on desktop, full width on mobile) -->
+      <div class="lg:col-span-7 space-y-4 sm:space-y-6">
+        <div class="bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200 space-y-4 sm:space-y-5">
           <div class="flex items-center space-x-2 pb-3 border-b border-slate-100">
             <i data-lucide="send" class="w-5 h-5 text-emerald-600"></i>
-            <h2 class="text-base font-semibold text-slate-900">Send WhatsApp Broadcast</h2>
+            <h2 class="text-sm sm:text-base font-bold text-slate-900">Send WhatsApp Broadcast</h2>
           </div>
 
           <!-- Campaign Name -->
           <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">Campaign Title</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Campaign Title</label>
             <input id="campaignName" type="text" placeholder="e.g. Weekend Discount Blast"
-                   class="w-full text-sm px-3.5 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none" />
+                   class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition" />
           </div>
 
           <!-- Template Selector Dropdown -->
           <div>
-            <label class="block text-xs font-medium text-slate-700 mb-1">Select Message Template</label>
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Select Message Template</label>
             <div class="relative">
               <select id="customTemplateName"
-                      class="w-full text-xs bg-slate-50 border border-slate-200 px-3 py-2.5 rounded-xl font-medium text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none cursor-pointer">
-                <option value="hello_world">⚡️ hello_world (Use for Sandbox Test Number)</option>
-                <option value="order_update">📦 order_update (Use for Production Business Number)</option>
-                <option value="my_test_message">📢 my_test_message (Custom Marketing)</option>
+                      class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-2xl font-medium text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none cursor-pointer transition">
+                <option value="hello_world">⚡️ hello_world (Sandbox Test)</option>
+                <option value="order_update">📦 order_update (Production)</option>
               </select>
-              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
                 <i data-lucide="chevron-down" class="w-4 h-4"></i>
               </div>
             </div>
-            <p class="text-[11px] text-slate-400 mt-1">Pick <span class="font-semibold text-slate-600">hello_world</span> for Sandbox tests, or your approved template for live broadcasts.</p>
           </div>
 
           <!-- Phone Numbers Input -->
           <div>
-            <div class="flex items-center justify-between mb-1">
-              <label class="block text-xs font-medium text-slate-700">Paste Customer Phone Numbers</label>
-              <span id="recipientCount" class="text-xs text-emerald-600 font-semibold">0 numbers</span>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-xs font-semibold text-slate-700">Paste Customer Numbers</label>
+              <span id="recipientCount" class="text-xs text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">0 numbers</span>
             </div>
-            <p class="text-[11px] text-slate-400 mb-2">Paste numbers with country code (one per line or separated by commas). E.g. 919876543210</p>
-            <textarea id="recipientList" rows="6" placeholder="919962761010&#10;918056132037&#10;919876543210"
-                      class="w-full text-sm px-3.5 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono"></textarea>
+            <p class="text-[11px] text-slate-400 mb-2">Paste numbers with country code (one per line). E.g. 919876543210</p>
+            <textarea id="recipientList" rows="5" placeholder="919962761010&#10;918056132037&#10;919876543210"
+                      class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none font-mono transition"></textarea>
           </div>
 
-          <!-- Launch Button -->
-          <button id="launchBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 px-4 rounded-xl shadow-sm transition flex items-center justify-center space-x-2 text-sm">
-            <i data-lucide="rocket" class="w-4 h-4"></i>
-            <span>Launch Broadcast to Customers</span>
+          <!-- Launch Button (Big, touch-friendly for mobile) -->
+          <button id="launchBtn" class="w-full bg-emerald-600 active:bg-emerald-700 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-emerald-600/25 transition flex items-center justify-center space-x-2">
+            <i data-lucide="rocket" class="w-5 h-5"></i>
+            <span>Launch WhatsApp Broadcast</span>
           </button>
 
-          <div id="broadcastAlert" class="hidden p-4 rounded-xl text-xs font-medium"></div>
+          <div id="broadcastAlert" class="hidden p-4 rounded-2xl text-xs font-semibold"></div>
         </div>
       </div>
 
       <!-- Real-Time Reports & History (5 cols) -->
-      <div class="lg:col-span-5 space-y-6">
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+      <div class="lg:col-span-5 space-y-4 sm:space-y-6">
+        <div class="bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200">
           <div class="flex items-center justify-between pb-4 border-b border-slate-100">
             <div class="flex items-center space-x-2">
               <i data-lucide="bar-chart-2" class="w-5 h-5 text-emerald-600"></i>
-              <h2 class="text-base font-semibold text-slate-900">Your Broadcast Reports</h2>
+              <h2 class="text-sm sm:text-base font-bold text-slate-900">Broadcast History</h2>
             </div>
-            <button id="refreshReports" class="text-xs text-slate-500 hover:text-slate-900 flex items-center space-x-1">
+            <button id="refreshReports" class="text-xs text-slate-500 hover:text-slate-900 flex items-center space-x-1 p-1.5 rounded-lg hover:bg-slate-100 transition">
               <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
-              <span>Refresh</span>
+              <span class="hidden sm:inline">Refresh</span>
             </button>
           </div>
 
-          <div id="campaignsContainer" class="mt-4 space-y-3">
+          <div id="campaignsContainer" class="mt-4 space-y-3 max-h-[450px] overflow-y-auto pr-1">
             <div class="text-center py-8 text-xs text-slate-400">Loading your history...</div>
           </div>
         </div>
