@@ -14,27 +14,31 @@ export const getCustomerTemplates = async (req: AuthRequest, res: Response) => {
   if (!userId) return res.status(401).json({ error: 'Unauthorized.' });
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user || !user.wabaId || !user.accessToken) {
-    // If WABA ID is not provided, return default template options
+  
+  // WABA ID is required by Meta to query message_templates
+  // If user hasn't configured WABA ID yet, we try to use environment WABA ID or return only hello_world
+  const wabaId = user?.wabaId || process.env.WABA_ID;
+  const token = user?.accessToken || process.env.WHATSAPP_TOKEN;
+
+  if (!wabaId || !token) {
     return res.json({
       templates: [
-        { name: 'hello_world', status: 'APPROVED', category: 'UTILITY', language: 'en_US' },
-        { name: 'order_update', status: 'APPROVED', category: 'UTILITY', language: 'en_US' }
+        { name: 'hello_world', status: 'APPROVED', category: 'UTILITY', language: 'en_US' }
       ]
     });
   }
 
   try {
     const axios = (await import('axios')).default;
-    const url = `https://graph.facebook.com/v20.0/${user.wabaId}/message_templates`;
+    const url = `https://graph.facebook.com/v20.0/${wabaId}/message_templates`;
     const response = await axios.get(url, {
-      headers: { Authorization: `Bearer ${user.accessToken}` },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     const metaTemplates = response.data.data || [];
     const formatted = metaTemplates.map((t: any) => ({
       name: t.name,
-      status: t.status, // APPROVED, IN_REVIEW, REJECTED
+      status: t.status, // APPROVED, IN_REVIEW, REJECTED, PENDING
       category: t.category,
       language: t.language,
     }));
@@ -42,12 +46,10 @@ export const getCustomerTemplates = async (req: AuthRequest, res: Response) => {
     return res.json({ templates: formatted });
   } catch (err: any) {
     const errMsg = err.response?.data?.error?.message || err.message;
-    console.error('Failed to fetch Meta templates:', errMsg);
-    // Fallback gracefully
+    console.error('Failed to fetch live Meta templates:', errMsg);
     return res.json({
       templates: [
-        { name: 'hello_world', status: 'APPROVED', category: 'UTILITY', language: 'en_US' },
-        { name: 'order_update', status: 'APPROVED', category: 'UTILITY', language: 'en_US' }
+        { name: 'hello_world', status: 'APPROVED', category: 'UTILITY', language: 'en_US' }
       ]
     });
   }
