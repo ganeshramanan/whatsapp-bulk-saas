@@ -342,6 +342,9 @@
         const res = await fetch('/api/templates', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
+        
+        if (handleUnauthorized(res)) return;
+
         const data = await res.json();
         const templates = data.templates || [];
 
@@ -397,6 +400,8 @@
           },
           body: JSON.stringify(payload),
         });
+
+        if (handleUnauthorized(res)) return;
 
         const data = await res.json();
         if (res.ok) {
@@ -463,6 +468,9 @@
         const res = await fetch('/api/campaigns', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
+        
+        if (handleUnauthorized(res)) return;
+
         const campaigns = await res.json();
 
         if (campaigns.length === 0) {
@@ -643,6 +651,18 @@
       }
     });
 
+    // Check & Handle 401 Unauthorized Automatically Across All API Calls
+    function handleUnauthorized(res) {
+      if (res.status === 401) {
+        localStorage.removeItem('grambi_token');
+        document.getElementById('dashboardView').classList.add('hidden');
+        document.getElementById('authView').classList.remove('hidden');
+        showAuthAlert('Session expired or invalid. Please sign in again.', 'error');
+        return true;
+      }
+      return false;
+    }
+
     // Auto Login on startup if token exists
     window.addEventListener('load', async () => {
       const token = localStorage.getItem('grambi_token');
@@ -655,7 +675,7 @@
             const user = await res.json();
             showDashboard(user);
           } else {
-            localStorage.removeItem('grambi_token');
+            handleUnauthorized(res);
           }
         } catch (e) {
           localStorage.removeItem('grambi_token');
