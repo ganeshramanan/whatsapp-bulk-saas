@@ -15,7 +15,6 @@ export interface TemplateComponent {
 export function parseMetaError(error: any): { isRetryable: boolean; userFriendlyMsg: string } {
   const fbError = error.response?.data?.error;
   const code = fbError?.code;
-  const subcode = fbError?.error_subcode;
   const rawMsg = fbError?.error_user_msg || fbError?.message || error.message || 'Unknown delivery failure';
 
   // 1. Transient / Temporary Failures -> RETRYABLE
@@ -29,7 +28,7 @@ export function parseMetaError(error: any): { isRetryable: boolean; userFriendly
     return { isRetryable: true, userFriendlyMsg: 'Network timeout connecting to Meta. Retrying...' };
   }
 
-  // 2. Permanent / User-Specific Failures -> NON-RETRYABLE (Fail fast to save server resources)
+  // 2. Permanent / User-Specific Failures -> NON-RETRYABLE
   if (code === 131026) {
     return { isRetryable: false, userFriendlyMsg: 'Recipient has blocked this business on WhatsApp.' };
   }
@@ -50,6 +49,8 @@ export function parseMetaError(error: any): { isRetryable: boolean; userFriendly
   }
 
   return { isRetryable: false, userFriendlyMsg: rawMsg };
+}
+
 export class WhatsAppService {
   async sendTemplateMessage(params: {
     phoneNumberId: string;
