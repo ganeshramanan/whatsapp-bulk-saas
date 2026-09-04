@@ -441,7 +441,7 @@
       }
     });
 
-    // Load Campaigns
+    // Load Campaigns with Modern Visual Analytics Cards & Progress Bars
     async function loadCampaigns() {
       const token = localStorage.getItem('grambi_token');
       if (!token) return;
@@ -454,7 +454,16 @@
         const campaigns = await res.json();
 
         if (campaigns.length === 0) {
-          container.innerHTML = '<div class="text-center py-8 text-xs text-slate-400">No broadcasts sent yet.</div>';
+          container.innerHTML = `
+            <div class="text-center py-10 px-4">
+              <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="inbox" class="w-6 h-6"></i>
+              </div>
+              <p class="text-xs font-semibold text-slate-700">No broadcasts launched yet</p>
+              <p class="text-[11px] text-slate-400 mt-1">Your sent campaigns and live delivery progress will show here.</p>
+            </div>
+          `;
+          lucide.createIcons();
           return;
         }
 
@@ -464,23 +473,77 @@
           const read = c.summary.READ || 0;
           const failed = c.summary.FAILED || 0;
           const pending = c.summary.PENDING || 0;
+          const total = c.total || (sent + delivered + read + failed + pending) || 1;
+
+          // Compute success percentage
+          const successCount = sent + delivered + read;
+          const percent = Math.min(100, Math.round((successCount / total) * 100));
+
+          // Format readable date
+          const dateObj = new Date(c.createdAt);
+          const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const dateStr = dateObj.toLocaleDateString([], { month: 'short', day: 'numeric' });
+
+          const isCompleted = pending === 0;
+          const statusBadge = isCompleted
+            ? (failed > 0 && successCount === 0 
+                ? '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200">Failed</span>'
+                : '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Completed</span>')
+            : '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse">Broadcasting...</span>';
 
           return `
-            <div class="border border-slate-100 rounded-xl p-4 bg-slate-50/50">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-slate-900">${c.name}</span>
-                <span class="text-[10px] text-slate-400 font-mono">${new Date(c.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 hover:border-slate-300 shadow-xs transition-all space-y-3.5">
+              
+              <!-- Card Header -->
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <h3 class="text-xs sm:text-sm font-bold text-slate-900 truncate leading-tight">${c.name}</h3>
+                  <div class="flex items-center space-x-2 mt-1">
+                    <span class="text-[10px] font-mono font-medium text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 truncate max-w-[120px] sm:max-w-xs">
+                      ${c.templateName}
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-medium">${dateStr}, ${timeStr}</span>
+                  </div>
+                </div>
+                ${statusBadge}
               </div>
-              <div class="flex items-center space-x-2 mt-3 text-[10px] font-semibold">
-                ${sent > 0 ? `<span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200">${sent} Sent</span>` : ''}
-                ${delivered > 0 ? `<span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-200">${delivered} Delivered</span>` : ''}
-                ${read > 0 ? `<span class="bg-purple-50 text-purple-700 px-2 py-0.5 rounded border border-purple-200">${read} Read</span>` : ''}
-                ${failed > 0 ? `<span class="bg-rose-50 text-rose-700 px-2 py-0.5 rounded border border-rose-200">${failed} Failed</span>` : ''}
-                ${pending > 0 ? `<span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded border border-amber-200">${pending} Queued</span>` : ''}
+
+              <!-- Visual Progress Bar -->
+              <div class="space-y-1">
+                <div class="flex items-center justify-between text-[11px] font-semibold text-slate-600">
+                  <span>Delivery Success</span>
+                  <span class="${percent === 100 ? 'text-emerald-600' : 'text-slate-800'} font-bold">${percent}%</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden flex">
+                  <div class="bg-emerald-500 h-full transition-all duration-500" style="width: ${percent}%"></div>
+                  ${failed > 0 ? `<div class="bg-rose-500 h-full" style="width: ${Math.round((failed / total) * 100)}%"></div>` : ''}
+                </div>
               </div>
+
+              <!-- Stat Badges Grid -->
+              <div class="grid grid-cols-4 gap-1.5 pt-1 text-center">
+                <div class="bg-slate-50 border border-slate-100 rounded-xl py-1.5 px-1">
+                  <div class="text-[9px] font-semibold text-slate-400 uppercase">Total</div>
+                  <div class="text-xs font-bold text-slate-800">${total}</div>
+                </div>
+                <div class="bg-blue-50/60 border border-blue-100 rounded-xl py-1.5 px-1">
+                  <div class="text-[9px] font-semibold text-blue-500 uppercase">Sent</div>
+                  <div class="text-xs font-bold text-blue-700">${sent}</div>
+                </div>
+                <div class="bg-emerald-50/60 border border-emerald-100 rounded-xl py-1.5 px-1">
+                  <div class="text-[9px] font-semibold text-emerald-600 uppercase">Delivered</div>
+                  <div class="text-xs font-bold text-emerald-700">${delivered}</div>
+                </div>
+                <div class="${failed > 0 ? 'bg-rose-50/80 border-rose-200' : 'bg-slate-50 border-slate-100'} border rounded-xl py-1.5 px-1">
+                  <div class="text-[9px] font-semibold ${failed > 0 ? 'text-rose-500' : 'text-slate-400'} uppercase">Failed</div>
+                  <div class="text-xs font-bold ${failed > 0 ? 'text-rose-700 font-extrabold' : 'text-slate-400'}">${failed}</div>
+                </div>
+              </div>
+
             </div>
           `;
         }).join('');
+        lucide.createIcons();
       } catch (err) {
         console.error(err);
       }
