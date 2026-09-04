@@ -21,6 +21,16 @@ model User {
   
   createdAt     DateTime        @default(now())
   campaigns     Campaign[]
+  subscriptions ProductSubscription[]
+}
+
+model ProductSubscription {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productKey  String    // e.g. "WHATSAPP_BROADCAST", "AI_CHATBOT", "INVENTORY"
+  status      String    @default("ACTIVE") // "ACTIVE", "TRIAL", "EXPIRED"
+  createdAt   DateTime  @default(now())
 }
 
 model Campaign {

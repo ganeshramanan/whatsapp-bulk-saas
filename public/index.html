@@ -35,17 +35,17 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased font-sans min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
 
-  <!-- ================= AUTH VIEW (Login / Register) ================= -->
+  <!-- ================= AUTH VIEW (Login / Register / Product Suite Landing) ================= -->
   <div id="authView" class="flex-1 flex items-center justify-center p-4 sm:p-6">
     <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-xl border border-slate-100">
       
-      <!-- Brand Header -->
+      <!-- Brand Header & Ecosystem Link -->
       <div class="text-center mb-6">
         <div class="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl mx-auto shadow-md shadow-emerald-600/20">
           G
         </div>
-        <h1 class="text-xl font-bold text-slate-900 mt-3">Welcome to Grambi</h1>
-        <p class="text-xs text-slate-500 mt-1">Smart WhatsApp Bulk Broadcasting</p>
+        <h1 class="text-xl font-bold text-slate-900 mt-3">Welcome to Grambi.in</h1>
+        <p class="text-xs text-slate-500 mt-1">Unified Business Growth Platform</p>
       </div>
 
       <!-- Tabs: Sign In / Register -->
@@ -129,9 +129,12 @@
           <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-sm sm:text-base shadow-sm">
             G
           </div>
-          <div class="truncate max-w-[150px] sm:max-w-xs">
+          <div class="truncate max-w-[140px] sm:max-w-xs">
             <h1 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight truncate" id="headerBusinessName">My Business</h1>
-            <p class="text-[10px] text-slate-400">Broadcaster</p>
+            <button id="openProductsSuiteBtn" class="text-[10px] text-emerald-700 font-bold hover:underline flex items-center space-x-0.5">
+              <span>Grambi Suite</span>
+              <i data-lucide="chevron-down" class="w-2.5 h-2.5"></i>
+            </button>
           </div>
         </div>
 
@@ -273,6 +276,68 @@
       </div>
 
     </main>
+  </div>
+
+  <!-- ================= PRODUCT SUITE / HUB SELECTOR MODAL ================= -->
+  <div id="productsModal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">
+            <i data-lucide="grid" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Grambi Business Suite</h3>
+            <p class="text-xs text-slate-400">Select an application from your ecosystem</p>
+          </div>
+        </div>
+        <button id="closeProductsModalBtn" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <!-- Product 1: WhatsApp Broadcaster (ACTIVE) -->
+        <div class="p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50/40 relative space-y-1.5 cursor-pointer">
+          <span class="absolute top-3 right-3 bg-emerald-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Active</span>
+          <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold mb-2">
+            <i data-lucide="message-square" class="w-4 h-4"></i>
+          </div>
+          <h4 class="text-xs sm:text-sm font-bold text-slate-900">WhatsApp Broadcaster</h4>
+          <p class="text-[11px] text-slate-500 leading-tight">Official Meta Cloud API bulk sender, delivery tracking & CSV imports.</p>
+        </div>
+
+        <!-- Product 2: AI Support Chatbot (COMING SOON) -->
+        <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 opacity-75 relative space-y-1.5">
+          <span class="absolute top-3 right-3 bg-slate-200 text-slate-600 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Coming Soon</span>
+          <div class="w-8 h-8 rounded-xl bg-indigo-500 text-white flex items-center justify-center font-bold mb-2">
+            <i data-lucide="bot" class="w-4 h-4"></i>
+          </div>
+          <h4 class="text-xs sm:text-sm font-bold text-slate-800">AI Auto-Reply Bot</h4>
+          <p class="text-[11px] text-slate-400 leading-tight">24/7 automated WhatsApp customer support & appointment booking.</p>
+        </div>
+
+        <!-- Product 3: Garage & Store CRM (COMING SOON) -->
+        <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 opacity-75 relative space-y-1.5">
+          <span class="absolute top-3 right-3 bg-slate-200 text-slate-600 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Coming Soon</span>
+          <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold mb-2">
+            <i data-lucide="users" class="w-4 h-4"></i>
+          </div>
+          <h4 class="text-xs sm:text-sm font-bold text-slate-800">Customer CRM & Billing</h4>
+          <p class="text-[11px] text-slate-400 leading-tight">Digital job cards, invoices, vehicle history & payment links.</p>
+        </div>
+
+        <!-- Product 4: Inventory & Stock Alert (COMING SOON) -->
+        <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 opacity-75 relative space-y-1.5">
+          <span class="absolute top-3 right-3 bg-slate-200 text-slate-600 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Coming Soon</span>
+          <div class="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center font-bold mb-2">
+            <i data-lucide="package" class="w-4 h-4"></i>
+          </div>
+          <h4 class="text-xs sm:text-sm font-bold text-slate-800">Stock & Inventory Alerts</h4>
+          <p class="text-[11px] text-slate-400 leading-tight">Low stock reminders and supplier order automation via WhatsApp.</p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ================= ADMIN PORTAL MODAL / VIEW ================= -->
@@ -953,6 +1018,19 @@
 
     document.getElementById('refreshReports').addEventListener('click', loadCampaigns);
     setInterval(loadCampaigns, 5000);
+
+    // Products Suite App Switcher Modal Logic
+    const productsModal = document.getElementById('productsModal');
+    const openProductsSuiteBtn = document.getElementById('openProductsSuiteBtn');
+    const closeProductsModalBtn = document.getElementById('closeProductsModalBtn');
+
+    openProductsSuiteBtn.addEventListener('click', () => {
+      productsModal.classList.remove('hidden');
+    });
+
+    closeProductsModalBtn.addEventListener('click', () => {
+      productsModal.classList.add('hidden');
+    });
 
     // ================= PWA REGISTRATION & INSTALLATION =================
     if ('serviceWorker' in navigator) {
