@@ -46,8 +46,9 @@ export const messageWorker = new Worker<JobData>(
 
       return { status: 'SENT', wamid };
     } catch (error: any) {
-      const errorMsg = error.response?.data?.error?.message || error.message;
-      console.error(`[Worker] ❌ Failed to send message to ${phoneNumber}:`, errorMsg);
+      const fbError = error.response?.data?.error;
+      const errorMsg = fbError?.error_user_msg || fbError?.message || error.message;
+      console.error(`[Worker] ❌ Failed to send message to ${phoneNumber}:`, errorMsg, fbError ? JSON.stringify(fbError) : '');
 
       await prisma.messageRecord.update({
         where: { id: recordId },
