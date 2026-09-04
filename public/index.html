@@ -400,9 +400,15 @@
 
         const data = await res.json();
         if (res.ok) {
-          showBroadcastAlert(`🚀 Broadcast queued (${data.totalQueued} recipients) — dispatching now...`, 'info');
+          showBroadcastAlert(`🚀 Broadcast queued (${data.totalQueued} recipient${data.totalQueued > 1 ? 's' : ''}) — dispatching now...`, 'info');
           document.getElementById('recipientList').value = '';
           document.getElementById('recipientCount').textContent = '0 numbers';
+          
+          // Automatically hide the "dispatching" banner after 4 seconds
+          setTimeout(() => {
+            const el = document.getElementById('broadcastAlert');
+            if (el) el.classList.add('hidden');
+          }, 4000);
           
           // Poll immediately after 1s, 2s, and 4s
           setTimeout(loadCampaigns, 800);
