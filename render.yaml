@@ -21,15 +21,9 @@ services:
           name: grambi-redis
           property: connectionString
 
+databases:
   # Managed PostgreSQL Database
-  - type: pg
-    name: grambi-postgres-db
+  - name: grambi-postgres-db
     plan: free
     ipAllowList: []
 
-  # Managed Redis Queue
-  - type: redis
-    name: grambi-redis
-    plan: free
-    maxmemoryPolicy: noeviction
-    ipAllowList: []
