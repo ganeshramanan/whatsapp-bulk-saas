@@ -626,7 +626,8 @@
         }).join('');
         lucide.createIcons();
       } catch (err) {
-        listContainer.innerHTML = '<div class="text-center py-4 text-xs text-rose-500">Failed to load customer list.</div>';
+        console.error('Error rendering customer list:', err);
+        listContainer.innerHTML = `<div class="text-center py-4 text-xs text-rose-500">Failed to load customer list: ${err.message || 'Server error'}</div>`;
       }
     }
 

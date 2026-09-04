@@ -126,28 +126,53 @@ export const getProfile = async (req: AuthRequest, res: Response) => {
 
 // List all customers for the Admin
 export const listAllCustomers = async (req: AuthRequest, res: Response) => {
-  const admin = await prisma.user.findUnique({ where: { id: req.userId } });
-  if (!admin || admin.role !== 'ADMIN') {
-    return res.status(403).json({ error: 'Access denied. Admin only.' });
-  }
-
-  const customers = await prisma.user.findMany({
-    orderBy: { createdAt: 'desc' },
-    select: {
-      id: true,
-      email: true,
-      businessName: true,
-      role: true,
-      phoneNumberId: true,
-      createdAt: true,
-      subscriptions: true,
-      _count: {
-        select: { campaigns: true }
-      }
+  try {
+    const admin = await prisma.user.findUnique({ where: { id: req.userId } });
+    if (!admin || admin.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Access denied. Admin only.' });
     }
-  });
 
-  return res.json({ customers });
+    // Safely query customers with error handling
+    let customers: any[] = [];
+    try {
+      customers = await prisma.user.findMany({
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          email: true,
+          businessName: true,
+          role: true,
+          phoneNumberId: true,
+          createdAt: true,
+          subscriptions: true,
+          _count: {
+            select: { campaigns: true }
+          }
+        }
+      });
+    } catch (dbErr) {
+      // Fallback if subscriptions table hasn't migrated yet
+      customers = await prisma.user.findMany({
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          email: true,
+          businessName: true,
+          role: true,
+          phoneNumberId: true,
+          createdAt: true,
+          _count: {
+            select: { campaigns: true }
+          }
+        }
+      });
+    }
+
+    return res.json({ customers });
+  } catch (err: any) {
+    console.error('Failed to list customers:', err);
+    return res.status(500).json({ error: err.message || 'Internal server error' });
+  }
 };
 
 // Update Customer Product Subscriptions (Admin only)
