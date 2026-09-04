@@ -182,7 +182,7 @@ export const listCustomerCampaigns = async (req: AuthRequest, res: Response) => 
   return res.json(formatted);
 };
 
-export const getCampaignDetails = async (req: AuthRequest, res: Response) => {
+export const exportCampaignCSV = async (req: AuthRequest, res: Response) => {
   const userId = req.userId;
   const { id } = req.params;
 
@@ -195,18 +195,13 @@ export const getCampaignDetails = async (req: AuthRequest, res: Response) => {
     return res.status(404).json({ error: 'Campaign not found.' });
   }
 
-  const summary = campaign.messages.reduce(
-    (acc, m) => {
-      acc[m.status] = (acc[m.status] || 0) + 1;
-      return acc;
-    },
-    {} as Record<string, number>
-  );
+  // Generate CSV rows
+  const header = 'Phone Number,Status,WhatsApp Message ID,Error Message,Sent At,Delivered At,Read At\n';
+  const rows = campaign.messages.map(m => {
+    return `"${m.phoneNumber}","${m.status}","${m.wamid || ''}","${(m.errorMessage || '').replace(/"/g, '""')}","${m.sentAt ? m.sentAt.toISOString() : ''}","${m.deliveredAt ? m.deliveredAt.toISOString() : ''}","${m.readAt ? m.readAt.toISOString() : ''}"`;
+  }).join('\n');
 
-  return res.json({
-    campaignId: campaign.id,
-    name: campaign.name,
-    summary,
-    messages: campaign.messages,
-  });
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', `attachment; filename="${campaign.name.replace(/[^a-zA-Z0-9]/g, '_')}_report.csv"`);
+  return res.send(header + rows);
 };

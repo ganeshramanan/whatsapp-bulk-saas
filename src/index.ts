@@ -3,7 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import dotenv from 'dotenv';
 import { register, login, getProfile, listAllCustomers, deleteCustomer } from './controllers/auth.controller';
-import { sendBulkMessages, listCustomerCampaigns, getCampaignDetails, getCustomerTemplates } from './controllers/message.controller';
+import { sendBulkMessages, listCustomerCampaigns, exportCampaignCSV, getCustomerTemplates } from './controllers/message.controller';
 import { verifyWebhook, handleWebhookEvents } from './controllers/webhook.controller';
 import { authMiddleware, AuthRequest } from './middlewares/auth.middleware';
 import { WhatsAppService } from './services/whatsapp.service';
@@ -35,7 +35,7 @@ app.delete('/api/admin/customers/:id', authMiddleware, deleteCustomer);
 app.get('/api/templates', authMiddleware, getCustomerTemplates);
 app.post('/api/messages/bulk', authMiddleware, sendBulkMessages);
 app.get('/api/campaigns', authMiddleware, listCustomerCampaigns);
-app.get('/api/campaigns/:id', authMiddleware, getCampaignDetails);
+app.get('/api/campaigns/:id/export', authMiddleware, exportCampaignCSV);
 
 // Update Customer Meta Phone ID / Token Route
 app.put('/api/auth/profile', authMiddleware, async (req: AuthRequest, res: express.Response) => {
