@@ -1,6 +1,6 @@
 import { Worker, Job } from 'bullmq';
 import { redisConnection } from './message.queue';
-import { WhatsAppService, TemplateComponent } from '../services/whatsapp.service';
+import { WhatsAppService, TemplateComponent, parseMetaError } from '../services/whatsapp.service';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -46,19 +46,23 @@ export const messageWorker = new Worker<JobData>(
 
       return { status: 'SENT', wamid };
     } catch (error: any) {
-      const fbError = error.response?.data?.error;
-      const errorMsg = fbError?.error_user_msg || fbError?.message || error.message;
-      console.error(`[Worker] ❌ Failed to send message to ${phoneNumber}:`, errorMsg, fbError ? JSON.stringify(fbError) : '');
+      const { isRetryable, userFriendlyMsg } = parseMetaError(error);
+      console.error(`[Worker] ❌ Failed to send to ${phoneNumber}:`, userFriendlyMsg);
 
       await prisma.messageRecord.update({
         where: { id: recordId },
         data: {
           status: 'FAILED',
-          errorMessage: errorMsg,
+          errorMessage: userFriendlyMsg,
         },
       });
 
-      throw error;
+      // Only throw to BullMQ for automatic exponential retry if the error is temporary/network/rate-limit
+      if (isRetryable) {
+        throw error;
+      }
+      // If it's a permanent user error (invalid number, template missing), don't waste retry loops
+      return { status: 'FAILED', error: userFriendlyMsg };
     }
   },
   {
