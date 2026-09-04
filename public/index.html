@@ -338,6 +338,12 @@
       document.getElementById('authView').classList.add('hidden');
       document.getElementById('dashboardView').classList.remove('hidden');
       document.getElementById('headerBusinessName').textContent = user.businessName || 'Business Portal';
+      
+      // Clear any previous alert banners on fresh login
+      const alertBox = document.getElementById('broadcastAlert');
+      alertBox.classList.add('hidden');
+      alertBox.textContent = '';
+      
       loadCampaigns();
     }
 
@@ -385,7 +391,11 @@
           showBroadcastAlert(`🚀 Successfully launched broadcast to ${data.totalQueued} customers!`, 'success');
           document.getElementById('recipientList').value = '';
           document.getElementById('recipientCount').textContent = '0 numbers';
-          loadCampaigns();
+          
+          // Poll immediately after 1s, 2s, and 3s so status updates from "Queued" to "Sent" live
+          setTimeout(loadCampaigns, 800);
+          setTimeout(loadCampaigns, 2000);
+          setTimeout(loadCampaigns, 4000);
         } else {
           showBroadcastAlert(data.error || 'Failed to dispatch broadcast', 'error');
         }
