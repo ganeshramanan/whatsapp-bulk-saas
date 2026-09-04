@@ -110,6 +110,7 @@ export const getProfile = async (req: AuthRequest, res: Response) => {
       role: true,
       phoneNumberId: true,
       wabaId: true,
+      subscriptions: true,
       createdAt: true,
     },
   });
@@ -139,6 +140,7 @@ export const listAllCustomers = async (req: AuthRequest, res: Response) => {
       role: true,
       phoneNumberId: true,
       createdAt: true,
+      subscriptions: true,
       _count: {
         select: { campaigns: true }
       }
@@ -146,6 +148,41 @@ export const listAllCustomers = async (req: AuthRequest, res: Response) => {
   });
 
   return res.json({ customers });
+};
+
+// Update Customer Product Subscriptions (Admin only)
+export const updateCustomerSubscriptions = async (req: AuthRequest, res: Response) => {
+  const admin = await prisma.user.findUnique({ where: { id: req.userId } });
+  if (!admin || admin.role !== 'ADMIN') {
+    return res.status(403).json({ error: 'Access denied. Admin only.' });
+  }
+
+  const { id } = req.params;
+  const { productKeys } = req.body; // array of string keys, e.g. ["WHATSAPP_BROADCAST", "AI_CHATBOT"]
+
+  if (!Array.isArray(productKeys)) {
+    return res.status(400).json({ error: 'productKeys must be an array of strings.' });
+  }
+
+  try {
+    // Replace existing subscriptions with the new list
+    await prisma.productSubscription.deleteMany({ where: { userId: id } });
+
+    if (productKeys.length > 0) {
+      await prisma.productSubscription.createMany({
+        data: productKeys.map((key: string) => ({
+          userId: id,
+          productKey: key,
+          status: 'ACTIVE',
+        })),
+      });
+    }
+
+    const updated = await prisma.productSubscription.findMany({ where: { userId: id } });
+    return res.json({ success: true, subscriptions: updated });
+  } catch (err: any) {
+    return res.status(500).json({ error: 'Failed to update subscriptions.' });
+  }
 };
 
 // Delete a customer account (Admin only)

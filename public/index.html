@@ -306,10 +306,10 @@
         </button>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-        <!-- Product 1: WhatsApp Broadcaster (ACTIVE) -->
-        <div class="p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50/40 relative space-y-1.5 cursor-pointer">
-          <span class="absolute top-3 right-3 bg-emerald-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Active</span>
+      <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <!-- Product 1: WhatsApp Broadcaster -->
+        <div id="product-card-WHATSAPP_BROADCAST" class="p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50/40 relative space-y-1.5 cursor-pointer">
+          <span id="badge-WHATSAPP_BROADCAST" class="absolute top-3 right-3 bg-emerald-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Active</span>
           <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold mb-2">
             <i data-lucide="message-square" class="w-4 h-4"></i>
           </div>
@@ -317,9 +317,9 @@
           <p class="text-[11px] text-slate-500 leading-tight">Official Meta Cloud API bulk sender, delivery tracking & CSV imports.</p>
         </div>
 
-        <!-- Product 2: AI Support Chatbot (COMING SOON) -->
-        <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 opacity-75 relative space-y-1.5">
-          <span class="absolute top-3 right-3 bg-slate-200 text-slate-600 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Coming Soon</span>
+        <!-- Product 2: AI Support Chatbot -->
+        <div id="product-card-AI_CHATBOT" class="p-4 rounded-2xl border border-slate-200 bg-slate-50 relative space-y-1.5 cursor-pointer">
+          <span id="badge-AI_CHATBOT" class="absolute top-3 right-3 bg-slate-200 text-slate-600 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Locked</span>
           <div class="w-8 h-8 rounded-xl bg-indigo-500 text-white flex items-center justify-center font-bold mb-2">
             <i data-lucide="bot" class="w-4 h-4"></i>
           </div>
@@ -327,9 +327,9 @@
           <p class="text-[11px] text-slate-400 leading-tight">24/7 automated WhatsApp customer support & appointment booking.</p>
         </div>
 
-        <!-- Product 3: Garage & Store CRM (COMING SOON) -->
-        <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 opacity-75 relative space-y-1.5">
-          <span class="absolute top-3 right-3 bg-slate-200 text-slate-600 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Coming Soon</span>
+        <!-- Product 3: Garage & Store CRM -->
+        <div id="product-card-GARAGE_CRM" class="p-4 rounded-2xl border border-slate-200 bg-slate-50 relative space-y-1.5 cursor-pointer">
+          <span id="badge-GARAGE_CRM" class="absolute top-3 right-3 bg-slate-200 text-slate-600 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Locked</span>
           <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold mb-2">
             <i data-lucide="users" class="w-4 h-4"></i>
           </div>
@@ -337,9 +337,9 @@
           <p class="text-[11px] text-slate-400 leading-tight">Digital job cards, invoices, vehicle history & payment links.</p>
         </div>
 
-        <!-- Product 4: Inventory & Stock Alert (COMING SOON) -->
-        <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 opacity-75 relative space-y-1.5">
-          <span class="absolute top-3 right-3 bg-slate-200 text-slate-600 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Coming Soon</span>
+        <!-- Product 4: Inventory & Stock Alert -->
+        <div id="product-card-INVENTORY" class="p-4 rounded-2xl border border-slate-200 bg-slate-50 relative space-y-1.5 cursor-pointer">
+          <span id="badge-INVENTORY" class="absolute top-3 right-3 bg-slate-200 text-slate-600 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Locked</span>
           <div class="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center font-bold mb-2">
             <i data-lucide="package" class="w-4 h-4"></i>
           </div>
@@ -495,6 +495,9 @@
       } else {
         adminBtn.classList.add('hidden');
       }
+
+      // Update Suite Modal Badges according to user's assigned product subscriptions
+      updateSuiteBadgesForUser(user);
       
       // Clear any previous alert banners on fresh login
       const alertBox = document.getElementById('broadcastAlert');
@@ -503,6 +506,34 @@
       
       loadCampaigns();
       fetchMetaTemplates(); // Dynamically fetch Meta templates
+    }
+
+    function updateSuiteBadgesForUser(user) {
+      const subs = (user.subscriptions || []).map(s => s.productKey);
+      const isProductActive = (key) => user.role === 'ADMIN' || subs.length === 0 || subs.includes(key);
+
+      const products = [
+        { key: 'WHATSAPP_BROADCAST', name: 'WhatsApp Broadcaster' },
+        { key: 'AI_CHATBOT', name: 'AI Auto-Reply Bot' },
+        { key: 'GARAGE_CRM', name: 'Customer CRM & Billing' },
+        { key: 'INVENTORY', name: 'Stock & Inventory Alerts' },
+      ];
+
+      products.forEach(p => {
+        const card = document.getElementById(`product-card-${p.key}`);
+        const badge = document.getElementById(`badge-${p.key}`);
+        if (!card || !badge) return;
+
+        if (isProductActive(p.key)) {
+          card.className = 'p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50/40 relative space-y-1.5 cursor-pointer';
+          badge.className = 'absolute top-3 right-3 bg-emerald-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase';
+          badge.textContent = 'Active';
+        } else {
+          card.className = 'p-4 rounded-2xl border border-slate-200 bg-slate-50 opacity-60 relative space-y-1.5 cursor-not-allowed';
+          badge.className = 'absolute top-3 right-3 bg-slate-200 text-slate-600 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase';
+          badge.textContent = 'Contact Admin';
+        }
+      });
     }
 
     // Admin Portal Logic
@@ -538,31 +569,104 @@
           return;
         }
 
-        listContainer.innerHTML = customers.map(c => `
-          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-3 hover:border-slate-300 transition">
-            <div class="min-w-0">
-              <div class="flex items-center space-x-2">
-                <span class="text-xs sm:text-sm font-bold text-slate-900 truncate">${c.businessName}</span>
-                ${c.role === 'ADMIN' ? '<span class="bg-indigo-100 text-indigo-700 text-[9px] font-bold px-2 py-0.5 rounded-md">ADMIN</span>' : ''}
+        listContainer.innerHTML = customers.map(c => {
+          const subs = (c.subscriptions || []).map(s => s.productKey);
+          const hasBroadcast = subs.length === 0 || subs.includes('WHATSAPP_BROADCAST');
+          const hasChatbot = subs.includes('AI_CHATBOT');
+          const hasCrm = subs.includes('GARAGE_CRM');
+          const hasInventory = subs.includes('INVENTORY');
+
+          return `
+          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3 hover:border-slate-300 transition">
+            <div class="flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex items-center space-x-2">
+                  <span class="text-xs sm:text-sm font-bold text-slate-900 truncate">${c.businessName}</span>
+                  ${c.role === 'ADMIN' ? '<span class="bg-indigo-100 text-indigo-700 text-[9px] font-bold px-2 py-0.5 rounded-md">ADMIN</span>' : ''}
+                </div>
+                <p class="text-[11px] text-slate-500 truncate mt-0.5">${c.email}</p>
+                <div class="flex items-center space-x-3 text-[10px] text-slate-400 font-mono mt-0.5">
+                  <span>Phone ID: ${c.phoneNumberId || 'Not set'}</span>
+                  <span>• ${c._count?.campaigns || 0} Campaigns</span>
+                </div>
               </div>
-              <p class="text-[11px] text-slate-500 truncate mt-0.5">${c.email}</p>
-              <div class="flex items-center space-x-3 text-[10px] text-slate-400 font-mono mt-1">
-                <span>Phone ID: ${c.phoneNumberId || 'Not set'}</span>
-                <span>• ${c._count?.campaigns || 0} Campaigns</span>
-              </div>
+              ${c.role !== 'ADMIN' ? `
+                <button onclick="deleteCustomerAccount('${c.id}', '${c.businessName.replace(/'/g, "\\'")}')" 
+                        class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-xl border border-rose-200 transition shrink-0 flex items-center space-x-1">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  <span class="hidden sm:inline">Delete</span>
+                </button>
+              ` : ''}
             </div>
+
+            <!-- Product Assignment Badges (Click to toggle) -->
             ${c.role !== 'ADMIN' ? `
-              <button onclick="deleteCustomerAccount('${c.id}', '${c.businessName.replace(/'/g, "\\'")}')" 
-                      class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold rounded-xl border border-rose-200 transition shrink-0 flex items-center space-x-1">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                <span class="hidden sm:inline">Delete</span>
-              </button>
+              <div class="pt-2 border-t border-slate-200/60 flex flex-wrap items-center gap-1.5">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">Products:</span>
+                <button type="button" onclick="toggleCustomerProduct('${c.id}', 'WHATSAPP_BROADCAST')" 
+                        class="px-2 py-0.5 rounded-lg text-[10px] font-semibold border transition cursor-pointer flex items-center space-x-1 ${hasBroadcast ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-slate-100 text-slate-400 border-slate-200 line-through'}">
+                  <span>📢 Broadcast</span>
+                </button>
+                <button type="button" onclick="toggleCustomerProduct('${c.id}', 'AI_CHATBOT')" 
+                        class="px-2 py-0.5 rounded-lg text-[10px] font-semibold border transition cursor-pointer flex items-center space-x-1 ${hasChatbot ? 'bg-indigo-100 text-indigo-800 border-indigo-300' : 'bg-slate-100 text-slate-400 border-slate-200'}">
+                  <span>🤖 AI Bot</span>
+                </button>
+                <button type="button" onclick="toggleCustomerProduct('${c.id}', 'GARAGE_CRM')" 
+                        class="px-2 py-0.5 rounded-lg text-[10px] font-semibold border transition cursor-pointer flex items-center space-x-1 ${hasCrm ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-slate-100 text-slate-400 border-slate-200'}">
+                  <span>👥 CRM & Bill</span>
+                </button>
+                <button type="button" onclick="toggleCustomerProduct('${c.id}', 'INVENTORY')" 
+                        class="px-2 py-0.5 rounded-lg text-[10px] font-semibold border transition cursor-pointer flex items-center space-x-1 ${hasInventory ? 'bg-blue-100 text-blue-800 border-blue-300' : 'bg-slate-100 text-slate-400 border-slate-200'}">
+                  <span>📦 Stock</span>
+                </button>
+              </div>
             ` : ''}
           </div>
-        `).join('');
+          `;
+        }).join('');
         lucide.createIcons();
       } catch (err) {
         listContainer.innerHTML = '<div class="text-center py-4 text-xs text-rose-500">Failed to load customer list.</div>';
+      }
+    }
+
+    async function toggleCustomerProduct(userId, productKey) {
+      const token = localStorage.getItem('grambi_token');
+      try {
+        const res = await fetch('/api/admin/customers', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const customer = (data.customers || []).find(c => c.id === userId);
+        if (!customer) return;
+
+        let currentSubs = (customer.subscriptions || []).map(s => s.productKey);
+        // Default to WHATSAPP_BROADCAST if empty
+        if (currentSubs.length === 0) currentSubs = ['WHATSAPP_BROADCAST'];
+
+        let newSubs;
+        if (currentSubs.includes(productKey)) {
+          newSubs = currentSubs.filter(k => k !== productKey);
+        } else {
+          newSubs = [...currentSubs, productKey];
+        }
+
+        const updateRes = await fetch(`/api/admin/customers/${userId}/subscriptions`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ productKeys: newSubs })
+        });
+
+        if (updateRes.ok) {
+          loadAdminCustomers();
+        } else {
+          alert('Failed to update product assignment.');
+        }
+      } catch (e) {
+        alert('Network error updating products.');
       }
     }
 
