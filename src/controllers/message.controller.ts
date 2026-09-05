@@ -29,22 +29,39 @@ export const getCustomerTemplates = async (req: AuthRequest, res: Response) => {
   try {
     const axios = (await import('axios')).default;
 
-    // If wabaId is not explicitly set, auto-discover it from the phoneNumberId using Meta Graph API
+    // If wabaId is not explicitly set, auto-discover it from the phoneNumberId or /me/accounts using Meta Graph API
     if (!wabaId && user?.phoneNumberId) {
       try {
-        const phoneLookup = await axios.get(`https://graph.facebook.com/v20.0/${user.phoneNumberId}?fields=whatsapp_business_account`, {
+        // Method 1: Query phone number details to find the parent WABA
+        const phoneLookup = await axios.get(`https://graph.facebook.com/v20.0/${user.phoneNumberId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (phoneLookup.data?.whatsapp_business_account?.id) {
-          wabaId = phoneLookup.data.whatsapp_business_account.id;
-          // Save discovered WABA ID to user record for faster future lookups
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { wabaId }
-          });
+        if (phoneLookup.data?.whatsapp_business_account_id) {
+          wabaId = phoneLookup.data.whatsapp_business_account_id;
+        } else if (phoneLookup.data?.id && phoneLookup.data?.account_mode) {
+          wabaId = phoneLookup.data.id;
         }
       } catch (lookupErr: any) {
-        console.warn('Could not auto-resolve WABA ID from phoneNumberId:', lookupErr.response?.data?.error?.message || lookupErr.message);
+        // Method 2: Query the token's businesses or debug token to find WABA ID
+        try {
+          const debugLookup = await axios.get(`https://graph.facebook.com/v20.0/debug_token?input_token=${token}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const granularScopes = debugLookup.data?.data?.granular_scopes || [];
+          const wabaScope = granularScopes.find((s: any) => s.scope === 'whatsapp_business_management' || s.scope === 'whatsapp_business_messaging');
+          if (wabaScope?.target_ids?.length > 0) {
+            wabaId = wabaScope.target_ids[0];
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      if (wabaId) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { wabaId }
+        });
       }
     }
 

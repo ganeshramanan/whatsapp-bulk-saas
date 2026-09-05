@@ -104,6 +104,11 @@
                    class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition" />
           </div>
           <div>
+            <label class="block text-[11px] font-medium text-slate-600 mb-1">WhatsApp Business Account ID (WABA ID)</label>
+            <input id="regWabaId" type="text" placeholder="Optional / e.g. 104859384938291"
+                   class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition" />
+          </div>
+          <div>
             <label class="block text-[11px] font-medium text-slate-600 mb-1">Permanent Access Token</label>
             <input id="regToken" type="password" required placeholder="EAAG..."
                    class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition" />
@@ -418,6 +423,7 @@
         email: document.getElementById('regEmail').value.trim(),
         password: document.getElementById('regPassword').value,
         phoneNumberId: document.getElementById('regPhoneId').value.trim(),
+        wabaId: document.getElementById('regWabaId').value.trim() || undefined,
         accessToken: document.getElementById('regToken').value.trim(),
       };
 
