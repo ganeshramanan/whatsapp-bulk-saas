@@ -77,6 +77,8 @@ const BulkSendSchema = z.object({
     z.object({
       phoneNumber: z.string(),
       components: z.array(z.any()).optional(),
+      parameters: z.array(z.string()).optional(),
+      vars: z.array(z.string()).optional(),
     })
   ).min(1),
 });
