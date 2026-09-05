@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import dotenv from 'dotenv';
-import { register, login, getProfile, listAllCustomers, deleteCustomer, updateCustomerSubscriptions, ssoLogin } from './controllers/auth.controller';
+import { register, login, getProfile, listAllCustomers, deleteCustomer, updateCustomerSubscriptions, ssoLogin, resetAdminPassword } from './controllers/auth.controller';
 import { sendBulkMessages, listCustomerCampaigns, exportCampaignCSV, getCustomerTemplates } from './controllers/message.controller';
 import { verifyWebhook, handleWebhookEvents } from './controllers/webhook.controller';
 import { authMiddleware, AuthRequest } from './middlewares/auth.middleware';
@@ -26,6 +26,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.post('/api/auth/register', register);
 app.post('/api/auth/login', login);
 app.post('/api/auth/sso-login', ssoLogin);
+app.post('/api/auth/reset-admin-password', resetAdminPassword);
 app.get('/api/auth/profile', authMiddleware, getProfile);
 
 // Admin Management Routes
