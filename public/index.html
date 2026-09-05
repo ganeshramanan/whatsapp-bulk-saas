@@ -913,10 +913,13 @@
         return;
       }
 
+      // If template is hello_world or order_update, force clean standard language payload
+      const payloadLanguageCode = (templateName === 'hello_world' || templateName === 'order_update') ? 'en_US' : languageCode;
+
       const payload = {
         campaignName,
         templateName,
-        languageCode,
+        languageCode: payloadLanguageCode,
         recipients: numbers.map(phoneNumber => ({ phoneNumber }))
       };
 
