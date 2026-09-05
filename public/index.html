@@ -905,7 +905,8 @@
       const templateSelect = document.getElementById('customTemplateName');
       const templateName = templateSelect.value.trim() || 'hello_world';
       const selectedOption = templateSelect.options[templateSelect.selectedIndex];
-      const languageCode = selectedOption ? (selectedOption.getAttribute('data-lang') || 'en_US') : 'en_US';
+      const rawLang = selectedOption ? selectedOption.getAttribute('data-lang') : null;
+      const languageCode = rawLang || (templateName === 'hello_world' ? 'en_US' : 'en_US');
       const numbers = parseNumbers(document.getElementById('recipientList').value);
 
       if (!campaignName || numbers.length === 0) {
@@ -913,13 +914,10 @@
         return;
       }
 
-      // If template is hello_world or order_update, force clean standard language payload
-      const payloadLanguageCode = (templateName === 'hello_world' || templateName === 'order_update') ? 'en_US' : languageCode;
-
       const payload = {
         campaignName,
         templateName,
-        languageCode: payloadLanguageCode,
+        languageCode,
         recipients: numbers.map(phoneNumber => ({ phoneNumber }))
       };
 
