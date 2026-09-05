@@ -225,3 +225,62 @@ export const deleteCustomer = async (req: AuthRequest, res: Response) => {
   await prisma.user.delete({ where: { id } });
   return res.json({ success: true, message: 'Customer account deleted successfully.' });
 };
+
+// Seamless Portal Launch / SSO Login (Allows Grambi Portal to log in customer directly)
+export const ssoLogin = async (req: Request, res: Response) => {
+  try {
+    const { email, businessName, phoneNumberId, accessToken, wabaId } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    let user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      // First time coming from portal: create account automatically
+      const userCount = await prisma.user.count();
+      const role = userCount === 0 ? 'ADMIN' : 'CUSTOMER';
+      const randomPassword = await bcrypt.hash(Math.random().toString(36), 10);
+
+      user = await prisma.user.create({
+        data: {
+          email,
+          password: randomPassword,
+          businessName: businessName || email.split('@')[0],
+          role,
+          phoneNumberId: phoneNumberId || null,
+          wabaId: wabaId || null,
+          accessToken: accessToken || null,
+        },
+      });
+    } else {
+      // Update existing customer's credentials if passed
+      if (phoneNumberId || accessToken || wabaId || businessName) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            phoneNumberId: phoneNumberId || undefined,
+            accessToken: accessToken || undefined,
+            wabaId: wabaId || undefined,
+            businessName: businessName || undefined,
+          },
+        });
+      }
+    }
+
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '30d' });
+
+    return res.json({
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        businessName: user.businessName,
+        role: user.role,
+        phoneNumberId: user.phoneNumberId,
+      },
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: 'SSO login failed: ' + (err.message || 'Server error') });
+  }
+};

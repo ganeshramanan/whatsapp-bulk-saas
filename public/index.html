@@ -1119,17 +1119,50 @@
       return false;
     }
 
-    // Auto Login on startup if token exists OR auto-fill from Grambi Portal launcher
+    // Auto Login on startup if token exists OR automatic seamless login from Grambi Portal launcher
     window.addEventListener('load', async () => {
       // 1. Check for parameters passed from Grambi Central Portal
       const urlParams = new URLSearchParams(window.location.search);
       const incomingPhoneId = urlParams.get('phone_number_id') || urlParams.get('phone_id');
       const incomingToken = urlParams.get('access_token') || urlParams.get('token');
+      const incomingWabaId = urlParams.get('waba_id');
       const incomingEmail = urlParams.get('customer_email') || urlParams.get('email');
       const incomingName = urlParams.get('customer_name') || urlParams.get('name');
 
-      if (incomingPhoneId || incomingToken || incomingEmail) {
-        // Auto-fill registration form inputs if user switches to register
+      if (incomingEmail) {
+        try {
+          // Attempt automatic seamless login
+          const ssoRes = await fetch('/api/auth/sso-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: incomingEmail,
+              businessName: incomingName || incomingEmail.split('@')[0],
+              phoneNumberId: incomingPhoneId,
+              accessToken: incomingToken,
+              wabaId: incomingWabaId
+            })
+          });
+
+          if (ssoRes.ok) {
+            const ssoData = await ssoRes.json();
+            if (ssoData.token) {
+              localStorage.setItem('grambi_token', ssoData.token);
+              
+              // Clean up URL query parameters cleanly without reloading page
+              if (window.history && window.history.replaceState) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+              }
+              
+              showDashboard(ssoData.user);
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn('[SSO Auto-Login]', e);
+        }
+
+        // Fallback: Pre-fill input fields if auto-login fails
         if (incomingPhoneId && document.getElementById('regPhoneId')) {
           document.getElementById('regPhoneId').value = incomingPhoneId;
         }
@@ -1144,7 +1177,6 @@
           document.getElementById('regBusinessName').value = incomingName;
         }
 
-        // Clean up URL query parameters cleanly without reloading page
         if (window.history && window.history.replaceState) {
           window.history.replaceState({}, document.title, window.location.pathname);
         }
