@@ -92,12 +92,25 @@ app.post('/api/messages/sandbox-test', authMiddleware, async (req: AuthRequest, 
 
     console.log(`[Direct Test] Sending ${chosenTemplate} (${chosenLang}) directly to ${recipientNumber}...`);
 
+    let components = undefined;
+    if (chosenTemplate === 'order_update') {
+      components = [
+        {
+          type: 'body',
+          parameters: [
+            { type: 'text', text: 'Confirmed' }
+          ]
+        }
+      ];
+    }
+
     const result = await waService.sendTemplateMessage({
       phoneNumberId: dbUser.phoneNumberId,
       token: dbUser.accessToken,
       to: recipientNumber.replace(/[^0-9]/g, ''),
       templateName: chosenTemplate,
       languageCode: chosenLang,
+      components,
     });
 
     console.log(`[Direct Test] ✅ Meta Response:`, JSON.stringify(result));

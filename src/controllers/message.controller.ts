@@ -111,10 +111,24 @@ export const sendBulkMessages = async (req: AuthRequest, res: Response) => {
   });
 
   // 3. Create message records in DB
-  const sanitizedRecipients = recipients.map(r => ({
-    phoneNumber: r.phoneNumber.replace(/[^0-9]/g, ''),
-    components: undefined
-  }));
+  const sanitizedRecipients = recipients.map(r => {
+    let components = undefined;
+    if (templateName === 'order_update') {
+      components = [
+        {
+          type: 'body',
+          parameters: [
+            { type: 'text', text: 'Confirmed' }
+          ]
+        }
+      ];
+    }
+
+    return {
+      phoneNumber: r.phoneNumber.replace(/[^0-9]/g, ''),
+      components
+    };
+  });
 
   const records = await prisma.$transaction(
     sanitizedRecipients.map(r =>
