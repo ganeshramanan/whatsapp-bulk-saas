@@ -234,7 +234,9 @@ export const ssoLogin = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Email is required' });
     }
 
-    let user = await prisma.user.findUnique({ where: { email } });
+    const normalizedEmail = email.toLowerCase().trim();
+    let user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+    
     if (!user) {
       // First time coming from portal: create account automatically
       const userCount = await prisma.user.count();
@@ -243,26 +245,27 @@ export const ssoLogin = async (req: Request, res: Response) => {
 
       user = await prisma.user.create({
         data: {
-          email,
+          email: normalizedEmail,
           password: randomPassword,
-          businessName: businessName || email.split('@')[0],
+          businessName: businessName || normalizedEmail.split('@')[0],
           role,
-          phoneNumberId: phoneNumberId || null,
-          wabaId: wabaId || null,
-          accessToken: accessToken || null,
+          phoneNumberId: phoneNumberId ? String(phoneNumberId).trim() : null,
+          wabaId: wabaId ? String(wabaId).trim() : null,
+          accessToken: accessToken ? String(accessToken).trim() : null,
         },
       });
     } else {
       // Update existing customer's credentials if passed
-      if (phoneNumberId || accessToken || wabaId || businessName) {
+      const updateData: any = {};
+      if (phoneNumberId) updateData.phoneNumberId = String(phoneNumberId).trim();
+      if (accessToken) updateData.accessToken = String(accessToken).trim();
+      if (wabaId) updateData.wabaId = String(wabaId).trim();
+      if (businessName) updateData.businessName = String(businessName).trim();
+
+      if (Object.keys(updateData).length > 0) {
         user = await prisma.user.update({
           where: { id: user.id },
-          data: {
-            phoneNumberId: phoneNumberId || undefined,
-            accessToken: accessToken || undefined,
-            wabaId: wabaId || undefined,
-            businessName: businessName || undefined,
-          },
+          data: updateData,
         });
       }
     }
@@ -281,6 +284,7 @@ export const ssoLogin = async (req: Request, res: Response) => {
       },
     });
   } catch (err: any) {
+    console.error('[ssoLogin Error]', err);
     return res.status(500).json({ error: 'SSO login failed: ' + (err.message || 'Server error') });
   }
 };

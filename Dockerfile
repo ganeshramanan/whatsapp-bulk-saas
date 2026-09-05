@@ -10,7 +10,7 @@ RUN npm ci --omit=optional
 # Copy source and prisma schema
 COPY tsconfig.json ./
 COPY prisma ./prisma/
-RUN npx prisma generate
+RUN sed -i 's/provider = "sqlite"/provider = "postgresql"/g' prisma/schema.prisma && npx prisma generate
 
 COPY src ./src/
 COPY public ./public/
@@ -36,4 +36,4 @@ COPY --from=builder /app/public ./public
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma db push && node dist/index.js"]
+CMD ["sh", "-c", "sed -i 's/provider = \"sqlite\"/provider = \"postgresql\"/g' prisma/schema.prisma && npx prisma db push && node dist/index.js"]
