@@ -23,6 +23,14 @@ export const messageWorker = new Worker<JobData>(
     const { recordId, phoneNumberId, token, phoneNumber, templateName, languageCode, components } = job.data;
 
     try {
+      console.log(`[Worker] Meta API Raw Request:`, JSON.stringify({
+        phoneNumberId,
+        to: phoneNumber,
+        templateName,
+        languageCode,
+        components
+      }));
+
       const result = await waService.sendTemplateMessage({
         phoneNumberId,
         token,
@@ -32,7 +40,7 @@ export const messageWorker = new Worker<JobData>(
         components,
       });
 
-      console.log(`[Worker] ✅ Message sent successfully! Result:`, result);
+      console.log(`[Worker] ✅ Meta API Response:`, JSON.stringify(result));
       const wamid = result.messages?.[0]?.id;
 
       await prisma.messageRecord.update({
