@@ -75,10 +75,11 @@ export class WhatsAppService {
       },
     };
 
-    // Strict check: Only attach components if it's a non-empty array with actual parameters
-    if (Array.isArray(params.components) && params.components.length > 0) {
+    if (params.components && Array.isArray(params.components) && params.components.length > 0) {
       payload.template.components = params.components;
     }
+
+    console.log('[WhatsAppService] Outbound Payload:', JSON.stringify(payload));
 
     const response = await axios.post(url, payload, {
       headers: {
