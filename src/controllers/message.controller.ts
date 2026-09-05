@@ -15,12 +15,10 @@ export const getCustomerTemplates = async (req: AuthRequest, res: Response) => {
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
   
-  // WABA ID is required by Meta to query message_templates
-  // If user hasn't configured WABA ID yet, we try to use environment WABA ID or return only hello_world
-  const wabaId = user?.wabaId || process.env.WABA_ID;
   const token = user?.accessToken || process.env.WHATSAPP_TOKEN;
+  let wabaId = user?.wabaId || process.env.WABA_ID;
 
-  if (!wabaId || !token) {
+  if (!token) {
     return res.json({
       templates: [
         { name: 'hello_world', status: 'APPROVED', category: 'UTILITY', language: 'en_US' }
@@ -30,6 +28,35 @@ export const getCustomerTemplates = async (req: AuthRequest, res: Response) => {
 
   try {
     const axios = (await import('axios')).default;
+
+    // If wabaId is not explicitly set, auto-discover it from the phoneNumberId using Meta Graph API
+    if (!wabaId && user?.phoneNumberId) {
+      try {
+        const phoneLookup = await axios.get(`https://graph.facebook.com/v20.0/${user.phoneNumberId}?fields=whatsapp_business_account`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (phoneLookup.data?.whatsapp_business_account?.id) {
+          wabaId = phoneLookup.data.whatsapp_business_account.id;
+          // Save discovered WABA ID to user record for faster future lookups
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { wabaId }
+          });
+        }
+      } catch (lookupErr: any) {
+        console.warn('Could not auto-resolve WABA ID from phoneNumberId:', lookupErr.response?.data?.error?.message || lookupErr.message);
+      }
+    }
+
+    if (!wabaId) {
+      console.warn('WABA ID not found. Return hello_world fallback.');
+      return res.json({
+        templates: [
+          { name: 'hello_world', status: 'APPROVED', category: 'UTILITY', language: 'en_US' }
+        ]
+      });
+    }
+
     const url = `https://graph.facebook.com/v20.0/${wabaId}/message_templates`;
     const response = await axios.get(url, {
       headers: { Authorization: `Bearer ${token}` },
@@ -42,6 +69,11 @@ export const getCustomerTemplates = async (req: AuthRequest, res: Response) => {
       category: t.category,
       language: t.language,
     }));
+
+    // Ensure hello_world is always available as a test template if not present
+    if (!formatted.some((t: any) => t.name === 'hello_world')) {
+      formatted.unshift({ name: 'hello_world', status: 'APPROVED', category: 'UTILITY', language: 'en_US' });
+    }
 
     return res.json({ templates: formatted });
   } catch (err: any) {
