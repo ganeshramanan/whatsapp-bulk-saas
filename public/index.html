@@ -874,9 +874,10 @@
 
     function updateTemplateUI() {
       const selected = customTemplateSelect.value;
-      const isCustomDynamic = selected !== 'hello_world';
+      // Only show variables box if the template actually uses variables
+      const hasVariables = selected === 'customer_service_notification' || selected === 'general_business_alert';
 
-      if (isCustomDynamic) {
+      if (hasVariables) {
         variablesBox.classList.remove('hidden');
       } else {
         variablesBox.classList.add('hidden');
@@ -885,8 +886,10 @@
       const v1 = var1Input.value.trim() || 'Monsoon is nearing. Please schedule your periodic vehicle service to ensure smooth driving.';
       const v2 = var2Input.value.trim() || 'VT Motors';
 
-      let text = TEMPLATE_PREVIEWS[selected] || `[Template: ${selected}] Dear Customer,\n\n{{1}}\n\nRegards,\n{{2}}`;
-      text = text.replace('{{1}}', v1).replace('{{2}}', v2);
+      let text = TEMPLATE_PREVIEWS[selected] || `[Template: ${selected}] This message template will be formatted and delivered to your customers' WhatsApp.`;
+      if (hasVariables) {
+        text = text.replace('{{1}}', v1).replace('{{2}}', v2);
+      }
       previewTextEl.textContent = text;
     }
 
@@ -964,13 +967,15 @@
 
       const v1 = document.getElementById('templateVar1')?.value?.trim();
       const v2 = document.getElementById('templateVar2')?.value?.trim();
+      const hasVariables = templateName === 'customer_service_notification' || templateName === 'general_business_alert';
 
       const recipientsPayload = numbers.map(phoneNumber => {
         const item: any = { phoneNumber };
-        if (templateName !== 'hello_world' && (v1 || v2)) {
-          const paramsList = [];
-          if (v1) paramsList.push(v1);
-          if (v2) paramsList.push(v2);
+        if (hasVariables) {
+          const paramsList = [
+            v1 || 'Monsoon is nearing. Please schedule your periodic vehicle service to ensure smooth driving.',
+            v2 || 'VT Motors'
+          ];
           item.parameters = paramsList;
         }
         return item;
