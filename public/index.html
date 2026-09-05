@@ -1120,7 +1120,7 @@
     }
 
     // Auto Login on startup if token exists OR automatic seamless login from Grambi Portal launcher
-    window.addEventListener('load', async () => {
+    (async function initAuthFlow() {
       // 1. Check for parameters passed from Grambi Central Portal
       const urlParams = new URLSearchParams(window.location.search);
       const incomingPhoneId = urlParams.get('phone_number_id') || urlParams.get('phone_id');
@@ -1131,7 +1131,7 @@
 
       if (incomingEmail) {
         try {
-          // Attempt automatic seamless login
+          console.log('[Grambi SSO] Attempting auto-login for:', incomingEmail);
           const ssoRes = await fetch('/api/auth/sso-login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1149,7 +1149,6 @@
             if (ssoData.token) {
               localStorage.setItem('grambi_token', ssoData.token);
               
-              // Clean up URL query parameters cleanly without reloading page
               if (window.history && window.history.replaceState) {
                 window.history.replaceState({}, document.title, window.location.pathname);
               }
@@ -1157,9 +1156,12 @@
               showDashboard(ssoData.user);
               return;
             }
+          } else {
+            const errData = await ssoRes.json().catch(() => ({}));
+            console.error('[Grambi SSO Error]', errData);
           }
         } catch (e) {
-          console.warn('[SSO Auto-Login]', e);
+          console.error('[Grambi SSO Exception]', e);
         }
 
         // Fallback: Pre-fill input fields if auto-login fails
@@ -1199,7 +1201,7 @@
           localStorage.removeItem('grambi_token');
         }
       }
-    });
+    })();
 
     document.getElementById('refreshReports').addEventListener('click', loadCampaigns);
     setInterval(loadCampaigns, 5000);
