@@ -758,9 +758,15 @@
           
           // Trigger change to update live preview with first template
           select.dispatchEvent(new Event('change'));
+          showBroadcastAlert(`Synced ${templates.length} template(s) from Meta.`, 'info');
+          setTimeout(() => {
+            const el = document.getElementById('broadcastAlert');
+            if (el) el.classList.add('hidden');
+          }, 3000);
         }
       } catch (err) {
         console.error('Failed to sync templates dynamically', err);
+        showBroadcastAlert('Failed to sync templates: ' + (err.message || 'Error'), 'error');
       }
     }
 
@@ -1084,43 +1090,47 @@
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const user = await res.json();
-        document.getElementById('modalPhoneId').value = user.phoneNumberId || '';
-        document.getElementById('modalToken').value = '';
-        settingsModal.classList.remove('hidden');
+        const phoneEl = document.getElementById('modalPhoneId');
+        if (phoneEl) phoneEl.value = user.phoneNumberId || '';
+        const tokenEl = document.getElementById('modalToken');
+        if (tokenEl) tokenEl.value = '';
+        if (settingsModal) settingsModal.classList.remove('hidden');
       } catch (e) {
         console.error(e);
       }
     });
 
-    const closeModal = () => settingsModal.classList.add('hidden');
-    closeSettingsBtn.addEventListener('click', closeModal);
-    cancelSettingsBtn.addEventListener('click', closeModal);
+    const closeModal = () => { if (settingsModal) settingsModal.classList.add('hidden'); };
+    if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', closeModal);
+    if (cancelSettingsBtn) cancelSettingsBtn.addEventListener('click', closeModal);
 
-    saveSettingsBtn.addEventListener('click', async () => {
-      const token = localStorage.getItem('grambi_token');
-      const phoneNumberId = document.getElementById('modalPhoneId').value.trim();
-      const accessToken = document.getElementById('modalToken').value.trim();
+    if (saveSettingsBtn) {
+      saveSettingsBtn.addEventListener('click', async () => {
+        const token = localStorage.getItem('grambi_token');
+        const phoneNumberId = document.getElementById('modalPhoneId')?.value?.trim();
+        const accessToken = document.getElementById('modalToken')?.value?.trim();
 
-      try {
-        const res = await fetch('/api/auth/profile', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({ phoneNumberId, accessToken: accessToken || undefined }),
-        });
+        try {
+          const res = await fetch('/api/auth/profile', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ phoneNumberId, accessToken: accessToken || undefined }),
+          });
 
-        if (res.ok) {
-          showBroadcastAlert('✅ Meta credentials updated successfully!', 'success');
-          closeModal();
-        } else {
-          showBroadcastAlert('Failed to update credentials.', 'error');
+          if (res.ok) {
+            showBroadcastAlert('✅ Meta credentials updated successfully!', 'success');
+            closeModal();
+          } else {
+            showBroadcastAlert('Failed to update credentials.', 'error');
+          }
+        } catch (err) {
+          showBroadcastAlert('Error updating credentials.', 'error');
         }
-      } catch (err) {
-        showBroadcastAlert('Error updating credentials.', 'error');
-      }
-    });
+      });
+    }
 
     // Check & Handle 401 Unauthorized Automatically Across All API Calls
     function handleUnauthorized(res) {
