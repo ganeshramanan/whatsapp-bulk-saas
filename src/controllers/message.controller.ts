@@ -13,8 +13,9 @@ export const getCustomerTemplates = async (req: AuthRequest, res: Response) => {
   const userId = req.userId;
   if (!userId) return res.status(401).json({ error: 'Unauthorized.' });
 
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    
     const token = user?.accessToken || process.env.WHATSAPP_TOKEN;
     const wabaId = user?.wabaId || process.env.WABA_ID;
 
