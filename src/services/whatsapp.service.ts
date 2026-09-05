@@ -75,8 +75,8 @@ export class WhatsAppService {
       },
     };
 
-    // Only attach components if parameters actually exist (avoids Meta payload parsing failure)
-    if (params.components && params.components.length > 0) {
+    // Strict check: Only attach components if it's a non-empty array with actual parameters
+    if (Array.isArray(params.components) && params.components.length > 0) {
       payload.template.components = params.components;
     }
 
