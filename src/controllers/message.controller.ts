@@ -44,11 +44,14 @@ export const getCustomerTemplates = async (req: AuthRequest, res: Response) => {
     });
 
     const metaTemplates = response.data.data || [];
+    console.log('[Meta Live Templates Raw Details]:', JSON.stringify(metaTemplates, null, 2));
+
     const formatted = metaTemplates.map((t: any) => ({
       name: t.name,
       status: t.status, // APPROVED, IN_REVIEW, REJECTED, PENDING
       category: t.category,
       language: t.language,
+      components: t.components || []
     }));
 
     // Ensure hello_world is always available as a test template if not present
