@@ -93,13 +93,12 @@ app.post('/api/messages/sandbox-test', authMiddleware, async (req: AuthRequest, 
     console.log(`[Direct Test] Sending ${chosenTemplate} (${chosenLang}) directly to ${recipientNumber}...`);
 
     let components = undefined;
-    if (chosenTemplate === 'order_update') {
+    if (chosenTemplate !== 'hello_world' && chosenTemplate !== 'order_update') {
       components = [
         {
           type: 'body',
           parameters: [
-            { type: 'text', text: 'Confirmed' },
-            { type: 'text', text: 'Grambi Order #1001' }
+            { type: 'text', text: 'Confirmed' }
           ]
         }
       ];

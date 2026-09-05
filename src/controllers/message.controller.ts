@@ -113,16 +113,9 @@ export const sendBulkMessages = async (req: AuthRequest, res: Response) => {
   // 3. Create message records in DB
   const sanitizedRecipients = recipients.map(r => {
     let components = undefined;
-    if (templateName === 'order_update') {
-      components = [
-        {
-          type: 'body',
-          parameters: [
-            { type: 'text', text: 'Confirmed' },
-            { type: 'text', text: 'Grambi Order #1001' }
-          ]
-        }
-      ];
+    // For order_update or any parameter-free approved template, send zero components
+    if (r.components && r.components.length > 0) {
+      components = r.components;
     }
 
     return {
