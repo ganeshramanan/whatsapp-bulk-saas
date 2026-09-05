@@ -15,58 +15,10 @@ export const getCustomerTemplates = async (req: AuthRequest, res: Response) => {
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
   
-  const token = user?.accessToken || process.env.WHATSAPP_TOKEN;
-  let wabaId = user?.wabaId || process.env.WABA_ID;
+    const token = user?.accessToken || process.env.WHATSAPP_TOKEN;
+    const wabaId = user?.wabaId || process.env.WABA_ID;
 
-  if (!token) {
-    return res.json({
-      templates: [
-        { name: 'hello_world', status: 'APPROVED', category: 'UTILITY', language: 'en_US' }
-      ]
-    });
-  }
-
-  try {
-    const axios = (await import('axios')).default;
-
-    // If wabaId is not explicitly set, auto-discover it from the phoneNumberId or /me/accounts using Meta Graph API
-    if (!wabaId && user?.phoneNumberId) {
-      try {
-        // Method 1: Query phone number details to find the parent WABA
-        const phoneLookup = await axios.get(`https://graph.facebook.com/v20.0/${user.phoneNumberId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (phoneLookup.data?.whatsapp_business_account_id) {
-          wabaId = phoneLookup.data.whatsapp_business_account_id;
-        } else if (phoneLookup.data?.id && phoneLookup.data?.account_mode) {
-          wabaId = phoneLookup.data.id;
-        }
-      } catch (lookupErr: any) {
-        // Method 2: Query the token's businesses or debug token to find WABA ID
-        try {
-          const debugLookup = await axios.get(`https://graph.facebook.com/v20.0/debug_token?input_token=${token}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const granularScopes = debugLookup.data?.data?.granular_scopes || [];
-          const wabaScope = granularScopes.find((s: any) => s.scope === 'whatsapp_business_management' || s.scope === 'whatsapp_business_messaging');
-          if (wabaScope?.target_ids?.length > 0) {
-            wabaId = wabaScope.target_ids[0];
-          }
-        } catch (e) {
-          // ignore
-        }
-      }
-
-      if (wabaId) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { wabaId }
-        });
-      }
-    }
-
-    if (!wabaId) {
-      console.warn('WABA ID not found. Return hello_world fallback.');
+    if (!token) {
       return res.json({
         templates: [
           { name: 'hello_world', status: 'APPROVED', category: 'UTILITY', language: 'en_US' }
@@ -74,6 +26,17 @@ export const getCustomerTemplates = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    if (!wabaId) {
+      console.warn('[Meta Templates] No WABA ID configured for user:', user?.email);
+      return res.json({
+        templates: [
+          { name: 'hello_world', status: 'APPROVED', category: 'UTILITY', language: 'en_US' }
+        ],
+        warning: 'Please save your WhatsApp Business Account ID (WABA ID) in Settings to load your custom templates.'
+      });
+    }
+
+    const axios = (await import('axios')).default;
     const url = `https://graph.facebook.com/v20.0/${wabaId}/message_templates`;
     const response = await axios.get(url, {
       headers: { Authorization: `Bearer ${token}` },
