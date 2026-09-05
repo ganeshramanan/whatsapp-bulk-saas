@@ -823,7 +823,7 @@
             const isApproved = t.status === 'APPROVED';
             const statusIcon = isApproved ? '🟢' : t.status === 'IN_REVIEW' ? '🟡' : '🔴';
             const disabledAttr = !isApproved && t.name !== 'hello_world' ? 'disabled' : '';
-            return `<option value="${t.name}" ${disabledAttr}>${statusIcon} ${t.name} (${t.status})</option>`;
+            return `<option value="${t.name}" data-lang="${t.language || 'en_US'}" ${disabledAttr}>${statusIcon} ${t.name} (${t.status})</option>`;
           }).join('');
           
           // Trigger change to update live preview with first template
@@ -913,7 +913,10 @@
     document.getElementById('launchBtn').addEventListener('click', async () => {
       const token = localStorage.getItem('grambi_token');
       const campaignName = document.getElementById('campaignName').value.trim();
-      const templateName = document.getElementById('customTemplateName').value.trim() || 'hello_world';
+      const templateSelect = document.getElementById('customTemplateName');
+      const templateName = templateSelect.value.trim() || 'hello_world';
+      const selectedOption = templateSelect.options[templateSelect.selectedIndex];
+      const languageCode = selectedOption ? (selectedOption.getAttribute('data-lang') || 'en_US') : 'en_US';
       const numbers = parseNumbers(document.getElementById('recipientList').value);
 
       if (!campaignName || numbers.length === 0) {
@@ -924,7 +927,7 @@
       const payload = {
         campaignName,
         templateName,
-        languageCode: 'en_US',
+        languageCode,
         recipients: numbers.map(phoneNumber => ({ phoneNumber }))
       };
 
