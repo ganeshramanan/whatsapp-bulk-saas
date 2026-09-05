@@ -1119,8 +1119,38 @@
       return false;
     }
 
-    // Auto Login on startup if token exists
+    // Auto Login on startup if token exists OR auto-fill from Grambi Portal launcher
     window.addEventListener('load', async () => {
+      // 1. Check for parameters passed from Grambi Central Portal
+      const urlParams = new URLSearchParams(window.location.search);
+      const incomingPhoneId = urlParams.get('phone_number_id') || urlParams.get('phone_id');
+      const incomingToken = urlParams.get('access_token') || urlParams.get('token');
+      const incomingEmail = urlParams.get('customer_email') || urlParams.get('email');
+      const incomingName = urlParams.get('customer_name') || urlParams.get('name');
+
+      if (incomingPhoneId || incomingToken || incomingEmail) {
+        // Auto-fill registration form inputs if user switches to register
+        if (incomingPhoneId && document.getElementById('regPhoneId')) {
+          document.getElementById('regPhoneId').value = incomingPhoneId;
+        }
+        if (incomingToken && document.getElementById('regToken')) {
+          document.getElementById('regToken').value = incomingToken;
+        }
+        if (incomingEmail) {
+          if (document.getElementById('loginEmail')) document.getElementById('loginEmail').value = incomingEmail;
+          if (document.getElementById('regEmail')) document.getElementById('regEmail').value = incomingEmail;
+        }
+        if (incomingName && document.getElementById('regBusinessName')) {
+          document.getElementById('regBusinessName').value = incomingName;
+        }
+
+        // Clean up URL query parameters cleanly without reloading page
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+
+      // 2. Existing standard session check
       const token = localStorage.getItem('grambi_token');
       if (token) {
         try {
