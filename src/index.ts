@@ -98,7 +98,8 @@ app.post('/api/messages/sandbox-test', authMiddleware, async (req: AuthRequest, 
         {
           type: 'body',
           parameters: [
-            { type: 'text', text: 'Confirmed' }
+            { type: 'text', text: 'Confirmed' },
+            { type: 'text', text: 'Grambi Order #1001' }
           ]
         }
       ];

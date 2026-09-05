@@ -118,7 +118,8 @@ export const sendBulkMessages = async (req: AuthRequest, res: Response) => {
         {
           type: 'body',
           parameters: [
-            { type: 'text', text: 'Confirmed' }
+            { type: 'text', text: 'Confirmed' },
+            { type: 'text', text: 'Grambi Order #1001' }
           ]
         }
       ];
