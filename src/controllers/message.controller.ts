@@ -71,14 +71,12 @@ export const getCustomerTemplates = async (req: AuthRequest, res: Response) => {
 const BulkSendSchema = z.object({
   campaignName: z.string().min(1),
   templateName: z.string().default('general_broadcast'),
-  messageText: z.string().optional(), // For universal template variable {{1}}
+  messageText: z.string().optional(),
   languageCode: z.string().default('en_US'),
   recipients: z.array(
     z.object({
       phoneNumber: z.string(),
       components: z.array(z.any()).optional(),
-      parameters: z.array(z.string()).optional(),
-      vars: z.array(z.string()).optional(),
     })
   ).min(1),
 });
@@ -113,25 +111,10 @@ export const sendBulkMessages = async (req: AuthRequest, res: Response) => {
   });
 
   // 3. Create message records in DB
-  const sanitizedRecipients = recipients.map(r => {
-    let finalComponents = r.components;
-    if (!finalComponents && (messageText || r.parameters || r.vars)) {
-      const paramList = r.parameters || (r.vars ? r.vars : (messageText ? [messageText] : []));
-      if (paramList.length > 0) {
-        finalComponents = [
-          {
-            type: 'body',
-            parameters: paramList.map((val: string) => ({ type: 'text', text: String(val) }))
-          }
-        ];
-      }
-    }
-
-    return {
-      phoneNumber: r.phoneNumber.replace(/[^0-9]/g, ''),
-      components: finalComponents
-    };
-  });
+  const sanitizedRecipients = recipients.map(r => ({
+    phoneNumber: r.phoneNumber.replace(/[^0-9]/g, ''),
+    components: r.components || undefined
+  }));
 
   const records = await prisma.$transaction(
     sanitizedRecipients.map(r =>
