@@ -62,7 +62,7 @@ export class WhatsAppService {
   }) {
     const url = `${BASE_URL}/${params.phoneNumberId}/messages`;
 
-    const payload = {
+    const payload: any = {
       messaging_product: 'whatsapp',
       recipient_type: 'individual',
       to: params.to,
@@ -72,9 +72,13 @@ export class WhatsAppService {
         language: {
           code: params.languageCode || 'en_US',
         },
-        components: params.components || [],
       },
     };
+
+    // Only attach components if parameters actually exist (avoids Meta payload parsing failure)
+    if (params.components && params.components.length > 0) {
+      payload.template.components = params.components;
+    }
 
     const response = await axios.post(url, payload, {
       headers: {
