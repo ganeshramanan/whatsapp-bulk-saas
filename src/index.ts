@@ -74,7 +74,7 @@ app.put('/api/auth/profile', authMiddleware, async (req: AuthRequest, res: expre
 // Instant Sandbox Test Route (Uses the Customer's Registered Phone Number ID)
 app.post('/api/messages/sandbox-test', authMiddleware, async (req: AuthRequest, res: express.Response) => {
   const userId = req.userId;
-  const { recipientNumber } = req.body;
+  const { recipientNumber, templateName, languageCode } = req.body;
 
   if (!recipientNumber) {
     return res.status(400).json({ error: 'recipientNumber is required.' });
@@ -87,16 +87,25 @@ app.post('/api/messages/sandbox-test', authMiddleware, async (req: AuthRequest, 
   }
 
   try {
+    const chosenTemplate = templateName || 'hello_world';
+    const chosenLang = languageCode || 'en_US';
+
+    console.log(`[Direct Test] Sending ${chosenTemplate} (${chosenLang}) directly to ${recipientNumber}...`);
+
     const result = await waService.sendTemplateMessage({
       phoneNumberId: dbUser.phoneNumberId,
       token: dbUser.accessToken,
       to: recipientNumber.replace(/[^0-9]/g, ''),
-      templateName: 'hello_world',
-      languageCode: 'en_US',
+      templateName: chosenTemplate,
+      languageCode: chosenLang,
     });
-    return res.json({ success: true, message: 'Delivered via Sandbox!', result });
+
+    console.log(`[Direct Test] ✅ Meta Response:`, JSON.stringify(result));
+    return res.json({ success: true, message: `Delivered via ${chosenTemplate}!`, result });
   } catch (err: any) {
-    const errMsg = err.response?.data?.error?.message || err.message;
+    const fbError = err.response?.data?.error;
+    const errMsg = fbError?.error_user_msg || fbError?.message || err.message;
+    console.error(`[Direct Test] ❌ Meta Error:`, fbError || err.message);
     return res.status(500).json({ error: errMsg });
   }
 });

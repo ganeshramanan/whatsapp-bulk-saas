@@ -959,36 +959,45 @@
       }
     });
 
-    // Instant Sandbox Test (No Template Review Needed)
+    // Instant Test (Direct One-Click Delivery Test)
     const sandboxTestBtn = document.getElementById('sandboxTestBtn');
     if (sandboxTestBtn) {
       sandboxTestBtn.addEventListener('click', async () => {
         const token = localStorage.getItem('grambi_token');
         const numbers = parseNumbers(document.getElementById('recipientList').value);
+        const templateSelect = document.getElementById('customTemplateName');
+        const templateName = templateSelect.value.trim() || 'hello_world';
+        const selectedOption = templateSelect.options[templateSelect.selectedIndex];
+        const languageCode = selectedOption ? (selectedOption.getAttribute('data-lang') || 'en_US') : 'en_US';
 
         if (numbers.length === 0) {
-          showBroadcastAlert('Please paste at least 1 verified test phone number.', 'error');
+          showBroadcastAlert('Please paste at least 1 phone number to test.', 'error');
           return;
         }
 
         try {
+          showBroadcastAlert(`⚡ Testing direct delivery with ${templateName}...`, 'info');
           const res = await fetch('/api/messages/sandbox-test', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`,
             },
-            body: JSON.stringify({ recipientNumber: numbers[0] }),
+            body: JSON.stringify({ 
+              recipientNumber: numbers[0],
+              templateName: templateName,
+              languageCode: languageCode
+            }),
           });
 
           const data = await res.json();
           if (res.ok) {
-            showBroadcastAlert(`⚡ Instant test message sent successfully to ${numbers[0]}!`, 'success');
+            showBroadcastAlert(`⚡ Message delivered successfully to ${numbers[0]} via ${templateName}!`, 'success');
           } else {
-            showBroadcastAlert(data.error || 'Failed to send sandbox test', 'error');
+            showBroadcastAlert(data.error || 'Failed to send test message', 'error');
           }
         } catch (err) {
-          showBroadcastAlert('Network error during sandbox test', 'error');
+          showBroadcastAlert('Network error during test', 'error');
         }
       });
     }
